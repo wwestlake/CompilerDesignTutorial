@@ -19,15 +19,22 @@
 
 %}
 
+FLOAT     [0-9]+\.{1}[0-9]+([e|E]{1}[+|-]?[0-9]+)?
+INT       [0-9]+
+IDENT     [a-zA-Z0-9]+
+QUIT      "quit"
+
 %option noyywrap
 
 %%
 
-[ \t]           ;
-[ \n]           { return T_NEWLINE; }
-[+-]?[0-9]+\.[0-9]+  { yylval.floatval = parse_number<float>(yytext);  return FLOAT; }
-[+-]?[0-9]+          { yylval.intval = parse_number<int>(yytext);      return INT; }
-[a-zA-Z0-9]+    { return IDENT; }
+[ \t\n]           ;
+{FLOAT}         { yylval.floatval = parse_number<double>(yytext);  return FLOAT; }
+{INT}           { yylval.intval = parse_number<int>(yytext);      return INT; }
+
+{QUIT}          { return T_QUIT; }
+
+{IDENT}         { return IDENT; }
 "+"             { return T_PLUS; }
 "-"             { return T_MINUS; }
 "/"             { return T_DIVIDE; }
