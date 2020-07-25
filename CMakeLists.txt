@@ -1,11 +1,18 @@
 
 cmake_minimum_required(VERSION 3.17)
 
-project(main CXX)
+project(DungeonCrawl CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_subdirectory(src)
+find_package(BISON)
+find_package(FLEX)
+
+
+
+add_subdirectory(command_line)
+add_subdirectory(dungeon)
+add_subdirectory(game)
 
 
 

@@ -1,0 +1,36 @@
+
+dungeon over_world;
+
+rooms [
+    lobby,
+    cell_1,
+    cell_2,
+    torture_chamber,
+    execution_room,
+    treasury
+];
+
+room lobby:
+    name "Lobby";
+    desc "The lobby contains various items you may need while exploring";
+    exits [cell_1, cell_2, torture_chamber];
+
+room cell_1:
+    name "Prison Cell";
+    desc "A prison cell";
+    exits [lobby];
+
+room cell_2:
+    name "Prison Cell";
+    desc "A prison cell";
+    exits [lobby];
+
+room torture_chamber:
+    name "Torture Chamber";
+    desc "A bad place to be";
+    exits [execution_room, lobby];
+
+room execution_room:
+    name "Execution Room";
+    desc "A very very bad place to be";
+    exits [treasury, torture_chamber];

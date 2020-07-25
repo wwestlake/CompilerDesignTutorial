@@ -1,68 +1,90 @@
 %{
+
+#define YY_BUF_SIZE 32768
+
+#include <stdio.h>    
 #include <iostream>
 #include <string>
 #include <vector>
-#include "ast.h"
-
+//#include "dungeon.h"
+#include "dungeon_parser.hpp"
 using namespace std;
 
-extern int yylex();
-extern int yyparse();
-
-typedef struct yy_buffer_state * YY_BUFFER_STATE;
-extern YY_BUFFER_STATE yy_scan_string(const char * str); // it does not work.
-extern YY_BUFFER_STATE yy_scan_buffer(char *, size_t);
-extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
-extern void yy_switch_to_buffer(YY_BUFFER_STATE buffer);
+extern int dnglex();
+extern int dngparse();
 
 
+extern FILE* dngin;
 
 int yyerror(const char * p)
 {
     cerr << p << endl;
 }
 
-std::vector<Node*> nodes;
 
 
 %}
+%locations
 
+%define api.prefix {dng}
 
+%define parse.trace
+%define parse.error verbose
 
 %union {
     int intval;
     double floatval;
+    char* str;
 };
+
+%token DUNGEON ROOMS ROOM NAME DESC EXITS
 
 %token<floatval> FLOAT
 %token<intval>   INT
-%token IDENT
+%token<str> IDENT
 
-%token T_PLUS T_MINUS T_DIVIDE T_MULTIPLY T_OPAREN T_CPAREN T_QUIT
+%token T_PLUS T_MINUS T_DIVIDE T_MULTIPLY 
+%token T_ROOM T_DOOR 
+%token<str> T_STRING
+%token<str> T_TEXT
 
 %type<floatval> float_expr
 %type<intval> int_expr
-
 
 %left T_PLUS T_MINUS
 %left T_MULTIPLY T_DIVIDE
 
 %%
 
-program:                
-    line            
-    | program line 
+dungeon:
+    DUNGEON IDENT ';' 
+        rooms  
+        room_defs
     ;
 
-line:
-    float_expr  { nodes.push_back(new Literal<double>($1)); }
-    | int_expr  { nodes.push_back(new Literal<int>($1)); }
-    | command
-    | error 
+room_defs:
+    room
+    | room_defs room
     ;
 
-command:
-    T_QUIT      { nodes.push_back(new CmdQuit()); }
+rooms:
+    ROOMS ident_list ';'
+    ;
+
+room:
+    ROOM IDENT ':'
+        NAME T_STRING ';'
+        DESC T_STRING ';'
+        EXITS ident_list ';'
+    ;
+
+ ident_list:
+    '[' list_of_idents ']'   
+    ;
+
+list_of_idents:
+    IDENT
+    | list_of_idents ',' IDENT
     ;
 
 float_expr:                           
@@ -71,7 +93,7 @@ float_expr:
     | float_expr T_MINUS float_expr         { $$ = $1 - $3; }
     | float_expr T_MULTIPLY float_expr      { $$ = $1 * $3; }
     | float_expr T_DIVIDE float_expr        { $$ = $1 / $3; }
-    | T_OPAREN float_expr T_CPAREN          { $$ = $2; }
+    | '(' float_expr ')'                    { $$ = $2; }
     | T_PLUS float_expr                     { $$ = $2; }
     | T_MINUS float_expr                    { $$ = -$2; }
     | int_expr                              { $$ = (double)$1; }
@@ -83,7 +105,7 @@ int_expr:
     | int_expr T_MINUS int_expr             { $$ = $1 - $3; }
     | int_expr T_MULTIPLY int_expr          { $$ = $1 * $3; }
     | int_expr T_DIVIDE int_expr            { $$ = $1 / $3; }
-    | T_OPAREN int_expr T_CPAREN            { $$ = $2; }
+    | '(' int_expr ')'                     { $$ = $2; }
     | T_PLUS int_expr                       { $$ = $2; }
     | T_MINUS int_expr                      { $$ = -$2; }
     ;
@@ -92,24 +114,18 @@ int_expr:
 
 %%
 
-Result eval(std::string line)
+int dng_eval(std::string filename)
 {
-    YY_BUFFER_STATE buffer = yy_scan_string(line.c_str());
-    yy_switch_to_buffer(buffer);
-    int rv = yyparse();
-
-    Result result(rv);
-    result.AddNodes(nodes);
-    nodes.clear();
-    yy_delete_buffer(buffer);
-    return result;
-}
-
-void clean_up(Result result)
-{
-    for (auto node : result.getNodes())
+    FILE * input =  fopen(filename.c_str(), "r");
+    if (! input)
     {
-        delete node;
-    }
+        std::cout << "Can't open file: " << filename << std::endl;
+        return -1;
+    }       
+
+    dngin = input;
+    return dngparse();
+
 }
+
 

@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <string>
-#include "ast.h"
+#include "../include/ast.h"
 
-extern int yylex(); 
-extern int yyparse();
+extern int cmdlex(); 
+extern int cmdparse();
+
+extern int dng_eval(std::string filename);
 
 
 extern Result eval(std::string line);
@@ -29,7 +31,7 @@ Result eval_command(std::string line)
     return eval(line);
 }
 
-int main(int argc, char ** argv)
+int command_line()
 {
     std::cout << "Welcome to Dungeon Crawl 2" << std::endl;
     Context context;
@@ -53,4 +55,18 @@ int main(int argc, char ** argv)
 
     std::cout << "Good Bye!" << std::endl;
 
+}
+
+
+int main(int argc, char ** argv)
+{
+    if (argc < 2)
+    {
+        std::cout << "You must specify a file" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    dng_eval(argv[1]);
+
+    return 0;
 }

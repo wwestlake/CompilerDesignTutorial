@@ -2,19 +2,12 @@
 %{
   #include <iostream>
   #include <sstream>
-  #include "parser.h"
-  using namespace std;
-  extern int yylex();
+  #include "parser.hpp"
+  #include "../include/lex_utilities.h"
 
-  template <typename T>
-  T parse_number(std::string numstr)
-  {
-    stringstream ss;
-    ss << numstr;
-    T result(0);
-    ss >> result;
-    return result;
-  }
+  using namespace std;
+  extern int cmdlex();
+
 
 
 %}
@@ -24,13 +17,15 @@ INT       [0-9]+
 IDENT     [a-zA-Z0-9]+
 QUIT      "quit"
 
+%option prefix="cmd"
 %option noyywrap
+
 
 %%
 
 [ \t\n]           ;
-{FLOAT}         { yylval.floatval = parse_number<double>(yytext);  return FLOAT; }
-{INT}           { yylval.intval = parse_number<int>(yytext);      return INT; }
+{FLOAT}         { cmdlval.floatval = parse_number<double>(yytext);  return FLOAT; }
+{INT}           { cmdlval.intval = parse_number<int>(yytext);      return INT; }
 
 {QUIT}          { return T_QUIT; }
 
