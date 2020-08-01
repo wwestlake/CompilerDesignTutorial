@@ -1,36 +1,62 @@
 
-dungeon over_world;
+(*
+    This is a block comment
+*)
 
-rooms [
-    lobby,
-    cell_1,
-    cell_2,
-    torture_chamber,
-    execution_room,
-    treasury
-];
+Dungeon MyFirstDungeon {
 
-room lobby:
-    name "Lobby";
-    desc "The lobby contains various items you may need while exploring";
-    exits [cell_1, cell_2, torture_chamber];
+    Description {
+        DisplayName "My First Dungeo"
 
-room cell_1:
-    name "Prison Cell";
-    desc "A prison cell";
-    exits [lobby];
+        Text @"
+ This is some formatted Text
+ that can contain newlines
+    tabs
+    and other formatting
+"
+    }
 
-room cell_2:
-    name "Prison Cell";
-    desc "A prison cell";
-    exits [lobby];
+    Item knife {
+        Description {
+            DisplayName "Knife" 
+            Text "A sharp knife"
+        }
+        Value=10
+    }
 
-room torture_chamber:
-    name "Torture Chamber";
-    desc "A bad place to be";
-    exits [execution_room, lobby];
+    Unique Item sceptor {
+        Description {
+            DisplayName "Sceptor"
+            Text "A jewel encrusted golden scepter"
+         }
+         Value=1000
+    }
 
-room execution_room:
-    name "Execution Room";
-    desc "A very very bad place to be";
-    exits [treasury, torture_chamber];
+    Room lobby {
+        Description {
+            DisplayName "The main lobby"
+
+            Text "This is the lobby"
+        }
+
+        Exits [torture_chamber, cell_block]
+        Items [knife, sceptor]
+    }
+
+    Room torture_chamber {
+        Description {
+            DisplayName "A torure chamber"
+            Text "A very bad place to be"
+        }
+    }
+
+    Room cell_block {
+        Description {
+            DisplayName "A room full of cells"
+            Text "A bad place to be"
+        }
+    }
+
+}
+
+

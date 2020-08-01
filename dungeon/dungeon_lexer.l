@@ -22,7 +22,7 @@ static std::string getString(const std::vector<char> buf)
     return ss.str();
 }
 
-static void clean_buffer(std::vector<char>& buf)
+static void clear_buffer(std::vector<char>& buf)
 {
     buf.clear();
 }
@@ -41,6 +41,17 @@ static void append_str(std::vector<char>& buf, char* str)
     }
 }
 
+template <typename T>
+static T parse_number(std::string numstr)
+{
+    std::stringstream ss;
+    ss << numstr;
+    T result(0);
+    ss >> result;
+    return result;
+}
+
+
 
 %}
 %option prefix="dng"
@@ -53,17 +64,19 @@ INT       [0-9]+
 IDENT     [a-zA-Z0-9_]+
 DESC      description|desc
 EOL [\n\r]
-ALL [.]*
+ALL (.|\n)
 
 %x str_start
-
+%x b_comment
+%x l_comment
+%x b_text
 
 %%
 
 [ \t\n\r]       ;
 
 
-\"                          { BEGIN str_start;   }
+\"                          { BEGIN str_start; clear_buffer(string_buffer);  }
 <str_start>[^\\"\n]*        { append_str(string_buffer, dngtext);  } 
 <str_start>\\a              { append_char(string_buffer, '\a'); }
 <str_start>\\b              { append_char(string_buffer, '\b'); }
@@ -77,6 +90,24 @@ ALL [.]*
 <str_start>\"               { dnglval.str = strdup(getString(string_buffer).c_str()); 
                                     BEGIN 0; return T_STRING; }
 
+
+"(*"                        { BEGIN b_comment; }
+<b_comment>"*)"             { BEGIN 0; }
+<b_comment>{EOL}            ;  
+<b_comment>{ALL}            ;
+
+"#"                         { BEGIN l_comment; }
+<l_comment>.*            ;
+<l_comment>{EOL}            { BEGIN 0; }
+
+"@\""                       { BEGIN b_text; clear_buffer(string_buffer); }
+<b_text>\\[\\"]             { append_char(string_buffer, dngtext[1]); }
+<b_text>"\""                { dnglval.str = strdup(getString(string_buffer).c_str());   BEGIN 0; return T_STRING; } 
+<b_text>{ALL}               { append_char(string_buffer, dngtext[0]); }
+
+{INT}                       { dnglval.intval = parse_number<int>(yytext); return INT; }
+
+
 ";"                         { return ';'; }  
 "["                         { return '['; }
 "]"                         { return ']'; }
@@ -84,15 +115,22 @@ ALL [.]*
 ":"                         { return ':'; }
 "("                         { return '('; }    
 ")"                         { return ')'; }    
+"{"                         { return '{'; }
+"}"                         { return '}'; }
+"="                         { return '='; }
 
-"dungeon"                   { return DUNGEON; }
-"rooms"                     { return ROOMS; }
-"room"                      { return ROOM; }
-"name"                      { return NAME; }
-"desc"                      { return DESC; }
-"exits"                     { return EXITS; }    
 
-{IDENT}                     { return IDENT; }
+"Dungeon"                   { return DUNGEON; }
+"Room"                      { return ROOM;    }
+"DisplayName"               { return NAME;    }
+"Description"               { return DESC;    }
+"Exits"                     { return EXITS;   }    
+"Unique"                    { return UNIQUE;  }
+"Item"                      { return ITEM;    }
+"Value"                     { return VALUE;   }
+"Text"                      { return TEXT;    }
+"Items"                     { return ITEMS;   }
+{IDENT}                     { return IDENT;   }
 
 %%
 

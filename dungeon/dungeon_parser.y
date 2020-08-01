@@ -37,7 +37,8 @@ int yyerror(const char * p)
     char* str;
 };
 
-%token DUNGEON ROOMS ROOM NAME DESC EXITS
+%token DUNGEON ROOM NAME DESC EXITS UNIQUE ITEM VALUE TEXT
+%token ITEMS
 
 %token<floatval> FLOAT
 %token<intval>   INT
@@ -57,59 +58,82 @@ int yyerror(const char * p)
 %%
 
 dungeon:
-    DUNGEON IDENT ';' 
-        rooms  
-        room_defs
+    DUNGEON IDENT '{' 
+        dungeon_items
+    '}'
     ;
 
-room_defs:
-    room
-    | room_defs room
+dungeon_items:
+    dungeon_item
+    | dungeon_items dungeon_item
     ;
 
-rooms:
-    ROOMS ident_list ';'
+dungeon_item:
+    description
+    | item
+    | unique_item
+    | room
+    ;
+
+item:
+    ITEM IDENT '{' description VALUE '=' INT '}'
+    ;
+
+unique_item:
+    UNIQUE ITEM IDENT '{' description VALUE '=' INT '}'
     ;
 
 room:
-    ROOM IDENT ':'
-        NAME T_STRING ';'
-        DESC T_STRING ';'
-        EXITS ident_list ';'
+    ROOM IDENT '{' 
+        room_items
+        '}'
     ;
 
- ident_list:
-    '[' list_of_idents ']'   
+room_items:
+    room_item
+    | room_items room_item
     ;
 
-list_of_idents:
+room_item:
+    description
+    | exit_list
+    | item_list
+    ;
+
+exit_list:
+    EXITS ident_list
+    ;    
+
+item_list:
+    ITEMS ident_list
+    ;
+
+description:
+    DESC '{' description_items '}'
+    ;
+
+description_items:
+    /* empty */
+    | display_name 
+    | display_name text
+    ;
+
+display_name:
+    NAME T_STRING
+    ;
+
+text:
+    TEXT T_STRING
+    ;
+
+ident_list:
+    '[' ident_list_items ']'
+    ;
+
+ident_list_items:
     IDENT
-    | list_of_idents ',' IDENT
+    | ident_list_items ',' IDENT
     ;
-
-float_expr:                           
-    FLOAT                                   { $$ = $1; }
-    | float_expr T_PLUS float_expr          { $$ = $1 + $3; }
-    | float_expr T_MINUS float_expr         { $$ = $1 - $3; }
-    | float_expr T_MULTIPLY float_expr      { $$ = $1 * $3; }
-    | float_expr T_DIVIDE float_expr        { $$ = $1 / $3; }
-    | '(' float_expr ')'                    { $$ = $2; }
-    | T_PLUS float_expr                     { $$ = $2; }
-    | T_MINUS float_expr                    { $$ = -$2; }
-    | int_expr                              { $$ = (double)$1; }
-    ;
-
-int_expr:                           
-    INT                                   { $$ = $1; }
-    | int_expr T_PLUS int_expr              { $$ = $1 + $3; }
-    | int_expr T_MINUS int_expr             { $$ = $1 - $3; }
-    | int_expr T_MULTIPLY int_expr          { $$ = $1 * $3; }
-    | int_expr T_DIVIDE int_expr            { $$ = $1 / $3; }
-    | '(' int_expr ')'                     { $$ = $2; }
-    | T_PLUS int_expr                       { $$ = $2; }
-    | T_MINUS int_expr                      { $$ = -$2; }
-    ;
-
 
 
 %%

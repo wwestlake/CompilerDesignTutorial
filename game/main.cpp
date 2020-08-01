@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "../include/ast.h"
+#include "../include/dungeon.h"
 
 extern int cmdlex(); 
 extern int cmdparse();
@@ -66,7 +67,11 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-    dng_eval(argv[1]);
+    //dng_eval(argv[1]);
+
+    Dungeon dung("dungeon", Description::makeDesc("My Dungeo", "Some text"));
+
+    dung.display(std::cout);
 
     return 0;
 }
