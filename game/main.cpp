@@ -11,7 +11,7 @@ extern int cmdparse();
 extern std::tuple<int, Dungeon*> dng_eval(std::string filename);
 
 
-extern Result eval(std::string line);
+extern Result eval(std::string line, Dungeon* dungeon);
 extern void clean_up(Result result);
 
 void print_prompt(std::string prompt)
@@ -27,12 +27,12 @@ std::string read_line()
     return line;
 }
 
-Result eval_command(std::string line)
+Result eval_command(std::string line, Dungeon* dungeon)
 {
-    return eval(line);
+    return eval(line, dungeon);
 }
 
-int command_line()
+int command_line(Dungeon* dungeon)
 {
     std::cout << "Welcome to Dungeon Crawl 2" << std::endl;
     Context context;
@@ -43,7 +43,7 @@ int command_line()
         std::string line = read_line();
         if (line.length() > 0)
         {
-            Result result =  eval_command(line);
+            Result result =  eval_command(line, dungeon);
 
             for (auto node : result.getNodes())
             {
@@ -55,7 +55,7 @@ int command_line()
     }
 
     std::cout << "Good Bye!" << std::endl;
-
+    return 0;
 }
 
 
@@ -69,9 +69,10 @@ int main(int argc, char ** argv)
 
     auto [ result, dung ] = dng_eval(argv[1]);
 
-
     if (result == 0 && dung != nullptr) {
-        dung->display(std::cout);
+        command_line(dung);
+    } else {
+        std::cout << "There were errors, game exiting" << std::endl;
     }
 
     return 0;

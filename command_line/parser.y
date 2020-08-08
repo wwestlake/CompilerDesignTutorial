@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "../include/ast.h"
+#include "../include/dungeon.h"
 
 using namespace std;
 
@@ -93,7 +94,7 @@ int_expr:
 
 %%
 
-Result eval(std::string line)
+Result eval(std::string line, Dungeon* dungeon)
 {
     YY_BUFFER_STATE buffer = cmd_scan_string(line.c_str());
     cmd_switch_to_buffer(buffer);
