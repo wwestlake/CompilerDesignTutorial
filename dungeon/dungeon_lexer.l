@@ -6,6 +6,7 @@
   #include <string>
   #include <string.h>
   #include <stdio.h>
+  #include "../include/dungeon.h"
   #include "dungeon_parser.hpp"
 
 extern int dnglex();
@@ -130,7 +131,7 @@ ALL (.|\n)
 "Value"                     { return VALUE;   }
 "Text"                      { return TEXT;    }
 "Items"                     { return ITEMS;   }
-{IDENT}                     { return IDENT;   }
+{IDENT}                     { dnglval.str = strdup(dngtext); return IDENT;   }
 
 %%
 

@@ -6,7 +6,7 @@
 Dungeon MyFirstDungeon {
 
     Description {
-        DisplayName "My First Dungeo"
+        DisplayName "My First Dungeon"
 
         Text @"
  This is some formatted Text
@@ -48,6 +48,8 @@ Dungeon MyFirstDungeon {
             DisplayName "A torure chamber"
             Text "A very bad place to be"
         }
+        Exits [torture_chamber, cell_block]
+        Items [knife, sceptor]
     }
 
     Room cell_block {
@@ -55,6 +57,8 @@ Dungeon MyFirstDungeon {
             DisplayName "A room full of cells"
             Text "A bad place to be"
         }
+        Exits [torture_chamber, cell_block]
+        Items [knife, sceptor]
     }
 
 }

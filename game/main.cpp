@@ -8,7 +8,7 @@
 extern int cmdlex(); 
 extern int cmdparse();
 
-extern int dng_eval(std::string filename);
+extern std::tuple<int, Dungeon*> dng_eval(std::string filename);
 
 
 extern Result eval(std::string line);
@@ -67,11 +67,12 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-    //dng_eval(argv[1]);
+    auto [ result, dung ] = dng_eval(argv[1]);
 
-    Dungeon dung("dungeon", Description::makeDesc("My Dungeo", "Some text"));
 
-    dung.display(std::cout);
+    if (result == 0 && dung != nullptr) {
+        dung->display(std::cout);
+    }
 
     return 0;
 }
