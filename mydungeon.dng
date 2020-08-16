@@ -5,6 +5,8 @@
 
 Dungeon MyFirstDungeon {
 
+    start torture_chamber
+
     Description {
         DisplayName "My First Dungeon"
 
@@ -48,7 +50,7 @@ Dungeon MyFirstDungeon {
             DisplayName "A torure chamber"
             Text "A very bad place to be"
         }
-        Exits [torture_chamber, cell_block]
+        Exits [torture_chamber, cell_block, lobby]
         Items [knife, sceptor]
     }
 
@@ -57,7 +59,7 @@ Dungeon MyFirstDungeon {
             DisplayName "A room full of cells"
             Text "A bad place to be"
         }
-        Exits [torture_chamber, cell_block]
+        Exits [torture_chamber, lobby]
         Items [knife, sceptor]
     }
 

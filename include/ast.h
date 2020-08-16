@@ -128,7 +128,34 @@ public:
 
 };
 
+class CmdGo : public Command {
+protected:
+    std::string _room_id;
 
+public:
+
+    CmdGo(std::string room_id) : _room_id(room_id) {}
+
+    virtual void Execute(Context& context)
+    {
+        Room* room = context.dungeon->findRoom(context.player->getCurrentRoom());
+        for (auto exit : room->getExits())
+        {
+            if (exit == _room_id)
+            {
+                context.player->setCurrentRoom(exit);
+                return;
+            }
+        }
+        std::cout << "Exit to room " << _room_id << " is not available from this room" << std::endl;
+    }
+
+    virtual std::string toString()
+    {
+        return "";
+    }
+
+};
 
 
 

@@ -14,9 +14,10 @@
 
 FLOAT     [0-9]+\.{1}[0-9]+([e|E]{1}[+|-]?[0-9]+)?
 INT       [0-9]+
-IDENT     [a-zA-Z0-9]+
+IDENT     [a-zA-Z0-9_]+
 QUIT      "quit"
 INFO      "info"
+GO        "go"
 
 %option prefix="cmd"
 %option noyywrap
@@ -30,8 +31,9 @@ INFO      "info"
 
 {QUIT}          { return T_QUIT; }
 {INFO}          { return T_INFO; }
+{GO}            { return T_GO; }
 
-{IDENT}         { return IDENT; }
+{IDENT}         { cmdlval.ident = yytext; return IDENT; }
 "+"             { return T_PLUS; }
 "-"             { return T_MINUS; }
 "/"             { return T_DIVIDE; }

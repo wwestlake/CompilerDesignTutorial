@@ -131,6 +131,7 @@ ALL (.|\n)
 "Value"                     { return VALUE;   }
 "Text"                      { return TEXT;    }
 "Items"                     { return ITEMS;   }
+"start"                     { return START;   }
 {IDENT}                     { dnglval.str = strdup(dngtext); return IDENT;   }
 
 %%

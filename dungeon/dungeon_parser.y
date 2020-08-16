@@ -26,7 +26,7 @@ int yyerror(const char * p)
 }
 
 static Dungeon* dungeon_result;
-
+static std::string startRoom;
 
 %}
 %locations
@@ -49,7 +49,7 @@ static Dungeon* dungeon_result;
     std::vector<DungeonNode*>* node_list;
 };
 
-%token DUNGEON ROOM NAME DESC EXITS UNIQUE ITEM VALUE TEXT
+%token DUNGEON ROOM NAME DESC EXITS UNIQUE ITEM VALUE TEXT START 
 %token ITEMS
 
 %token<floatval> FLOAT
@@ -99,7 +99,7 @@ dungeon:
         }
         if (desc != nullptr) 
         {
-            $$ = new Dungeon(ident, desc->getDisplayName(), desc->getDescription());
+            $$ = new Dungeon(ident, desc->getDisplayName(), startRoom, desc->getDescription());
             for (auto node : *$4)
             {
                 switch (node->getNodeType())
@@ -129,6 +129,7 @@ dungeon_item:
     | item          { $$ = $1; }
     | unique_item   { $$ = $1; }
     | room          { $$ = $1; }
+    | START IDENT   { startRoom = $2; }
     ;
 
 item:

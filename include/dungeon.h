@@ -129,15 +129,18 @@ class Dungeon : public DungeonNode {
 protected:
     std::vector<Room*> _rooms;
     std::vector<Item*> _items;
+    std::string _startRoom;
 
 public:
-    Dungeon(std::string ident, std::string display_name, std::string description)
-        : DungeonNode(ident, display_name, description, NodeType::Dungeon) {}    
+    Dungeon(std::string ident, std::string display_name, std::string startRoom, std::string description)
+        : DungeonNode(ident, display_name, description, NodeType::Dungeon), _startRoom(startRoom) {}    
 
     void addRoom(Room* room)
     {
         _rooms.push_back(room);
     }
+
+    std::string getStartRoom() { return _startRoom; }
 
     Room* findRoom(std::string id)
     {

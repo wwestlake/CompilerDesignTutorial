@@ -34,13 +34,15 @@ std::vector<Node*> nodes;
 %union {
     int intval;
     double floatval;
+    char* ident;
 };
 
 %token<floatval> FLOAT
 %token<intval>   INT
-%token IDENT
 
-%token T_PLUS T_MINUS T_DIVIDE T_MULTIPLY T_OPAREN T_CPAREN T_QUIT T_INFO
+%token<ident> IDENT
+
+%token T_PLUS T_MINUS T_DIVIDE T_MULTIPLY T_OPAREN T_CPAREN T_QUIT T_INFO T_GO
 
 %type<floatval> float_expr
 %type<intval> int_expr
@@ -66,6 +68,7 @@ line:
 command:
     T_QUIT      { nodes.push_back(new CmdQuit()); }
     | T_INFO    { nodes.push_back(new CmdInfo()); }
+    | T_GO IDENT { nodes.push_back(new CmdGo($2)); }
     ;
 
 float_expr:                           

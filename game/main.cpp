@@ -46,7 +46,7 @@ int command_line(Dungeon* dungeon)
     playerName = read_line();
 
     context.dungeon = std::shared_ptr<Dungeon>(dungeon);
-    context.player = std::make_shared<Player>(playerName, "lobby");
+    context.player = std::make_shared<Player>(playerName, context.dungeon->getStartRoom());
 
 
     while (context.running) {
