@@ -5,10 +5,15 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <memory>
+#include "dungeon.h"
+#include "player.h"
 
 class Context {
 public:
     bool running;
+    std::shared_ptr<Dungeon> dungeon;
+    std::shared_ptr<Player> player;
 };
 
 
@@ -87,6 +92,33 @@ public:
     virtual void Execute(Context& context)
     {
         context.running = false;
+    }
+
+    virtual std::string toString()
+    {
+        return "";
+    }
+
+};
+
+class CmdInfo : public Command 
+{
+public:
+    virtual void Execute(Context& context)
+    {
+        std::cout << "----------------------" << std::endl;
+
+        std::cout << *context.player << std::endl;
+        std::cout << "----------------------" << std::endl;
+        std::cout << "Room" << std::endl;
+
+        Room* room = context.dungeon->findRoom(context.player->getCurrentRoom());
+        if (room != nullptr)
+        {
+            room->display(std::cout);
+        }
+
+
     }
 
     virtual std::string toString()

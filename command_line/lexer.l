@@ -16,6 +16,7 @@ FLOAT     [0-9]+\.{1}[0-9]+([e|E]{1}[+|-]?[0-9]+)?
 INT       [0-9]+
 IDENT     [a-zA-Z0-9]+
 QUIT      "quit"
+INFO      "info"
 
 %option prefix="cmd"
 %option noyywrap
@@ -28,6 +29,7 @@ QUIT      "quit"
 {INT}           { cmdlval.intval = parse_number<int>(yytext);      return INT; }
 
 {QUIT}          { return T_QUIT; }
+{INFO}          { return T_INFO; }
 
 {IDENT}         { return IDENT; }
 "+"             { return T_PLUS; }

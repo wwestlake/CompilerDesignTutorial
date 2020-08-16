@@ -139,6 +139,16 @@ public:
         _rooms.push_back(room);
     }
 
+    Room* findRoom(std::string id)
+    {
+        for (auto room : _rooms)
+        {
+            if (room->getIdent() == id) return room;
+        }
+        return nullptr;
+    }
+
+
     std::vector<Room*> getRooms()
     {
         return _rooms;

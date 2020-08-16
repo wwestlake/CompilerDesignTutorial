@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include "../include/ast.h"
 #include "../include/dungeon.h"
 
@@ -38,8 +39,18 @@ int command_line(Dungeon* dungeon)
     Context context;
     context.running = true;
 
+    std::string playerName;
+    std::cout << "Enter your player name: ";
+    std::cout.flush();
+
+    playerName = read_line();
+
+    context.dungeon = std::shared_ptr<Dungeon>(dungeon);
+    context.player = std::make_shared<Player>(playerName, "lobby");
+
+
     while (context.running) {
-        print_prompt("Dungeon> ");
+        print_prompt(context.player->getPLayerName() + ": " + context.player->getCurrentRoom() + "> ");
         std::string line = read_line();
         if (line.length() > 0)
         {
