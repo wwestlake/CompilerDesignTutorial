@@ -5,6 +5,13 @@
 #include <memory>
 #include "../include/ast.h"
 #include "../include/dungeon.h"
+#include "../fungeon/utils.h"
+#include "../fungeon/fungeon_ast.h"
+#include "../build/fungeon/fungeon_parser.hpp"
+
+extern FILE* fungeon_in;
+
+
 
 extern int cmdlex(); 
 extern int cmdparse();
@@ -70,7 +77,7 @@ int command_line(Dungeon* dungeon)
 }
 
 
-int main(int argc, char ** argv)
+int _main(int argc, char ** argv)
 {
     if (argc < 2)
     {
@@ -88,3 +95,29 @@ int main(int argc, char ** argv)
 
     return 0;
 }
+
+
+int main(int ac, char ** av)
+{
+    std::cout << "fungeon ver 0.0.1 alpha" << std::endl;
+
+    if (ac < 2)
+    {
+        std::cout << "USAGE " << av[0] << " <input file> " << std::endl;
+        return 1;
+    }
+    std::string filename = std::string(av[1]);
+    FILE * input =  fopen(av[1], "r");
+    if (! input)
+    {
+        std::cout << "Can't open file: " << av[1] << std::endl;
+        return 1;
+    }       
+
+    fungeon_in = input;
+    fungeon_parse();
+
+
+     return 0;
+}
+

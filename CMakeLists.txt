@@ -12,6 +12,7 @@ find_package(FLEX)
 
 add_subdirectory(command_line)
 add_subdirectory(dungeon)
+add_subdirectory(fungeon)
 add_subdirectory(game)
 
 

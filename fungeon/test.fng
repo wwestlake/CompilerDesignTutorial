@@ -1,0 +1,17 @@
+
+
+let func (a : int) = 1 + 2 / (3 * B) / 47.4
+let func2 (s : string) = "this is a test " + s
+let a = -1 + ( ++a ) / ( b-- )
+
+let add3 a b c = {
+    let add2 a b = {
+        a + b
+    }
+    (add2 a b) + c
+}
+
+let a = b
+
+
+
