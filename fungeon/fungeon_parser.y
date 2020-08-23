@@ -16,6 +16,8 @@ extern FILE *funcle_in;
 bool errors = false;
 std::string filename;
 
+#define DEBUG(A) std::cout << A; std::cout.flush(); do {} while (false)
+
 int fungeon_error(const char *p) 
 { 
     
@@ -54,6 +56,10 @@ int fungeon_lex();
     std::string* error_message;
     char* op_val;
     Types type;
+    Identifier* typed_identifier;
+    ParameterList* param_list;
+    Parameter* param;
+
 };
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA
@@ -71,6 +77,9 @@ int fungeon_lex();
 %token<bool_val>    BOOL_VAL    
 
 %type<type> type unit
+%type<typed_identifier> identifier typed_identifier
+%type<param> param;
+%type<param_list> param_list
 
 
 %left PLUS MINUS
@@ -161,21 +170,21 @@ expr:
     ;
 
 param:
-    identifier
-    | typed_identifier
+    identifier                  { $$ = (Parameter*)$1; }
+    | typed_identifier          { $$ = (Parameter*)$1; }
     ;
 
 param_list:
-    param
-    | param_list param
+    param                   { $$ = new ParameterList(); $$->push_back($1); DEBUG(*$1);}
+    | param_list param      { $$ = $1; $$->push_back($2); DEBUG(*$2); }
     ;
 
 typed_identifier:
-    OPAREN identifier COLON type CPAREN
+    OPAREN identifier COLON type CPAREN   { $2->setType($4); $$ = $2; DEBUG(*$$); }  
     ;
 
 identifier:
-    IDENT
+    IDENT               { $$ = new Identifier(std::string($1), Types::INFER); DEBUG(*$$); }
     ;
 
 type:

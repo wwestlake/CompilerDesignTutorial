@@ -57,6 +57,42 @@ public:
 };
 
 
+class Identifier : public FngNode {
+protected:
+    std::string _ident;
+    Types _type;
+
+public:
+    Identifier(std::string ident, Types type) : _ident(ident), _type(type) {}
+
+    std::string getIdent() { return _ident; }
+    Types getType() { return _type; }
+    void setType(Types type) { _type = type; }
+
+    virtual void visit(Visitor* visitor) {}
+
+    virtual std::ostream& out(std::ostream& os) const override {
+        os <<  "(" <<  _ident << " : " << type_to_string(_type) << ")" << std::endl;
+        return os;
+    }    
+   
+
+};
+
+class Parameter : public Identifier {
+public:
+    Parameter(std::string ident, Types type) : Identifier(ident, type) {}
+
+    virtual std::ostream& out(std::ostream& os) const override {
+        os <<  "param (" <<  _ident << " : " << type_to_string(_type) << ")" << std::endl;
+        return os;
+    }    
+
+
+};
+
+typedef std::vector<Parameter*> ParameterList;
+
 
 
 
