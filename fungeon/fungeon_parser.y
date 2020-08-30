@@ -59,6 +59,9 @@ int fungeon_lex();
     Identifier* typed_identifier;
     ParameterList* param_list;
     Parameter* param;
+    Expression* expression;
+    LValue* lvalue;
+    RValue* rvalue;
 
 };
 
@@ -80,6 +83,9 @@ int fungeon_lex();
 %type<typed_identifier> identifier typed_identifier
 %type<param> param;
 %type<param_list> param_list
+%type<expression> expr
+%type<lvalue> lvalue 
+%type<rvalue> rvalue literal
 
 
 %left PLUS MINUS
@@ -123,14 +129,15 @@ stmt_list:
 rvalue:
     lvalue
     | literal
+    | fun_call
     ;
 
 literal:
-    STRING_VAL
-    | INT_VAL
-    | FLOAT_VAL
-    | CHAR_VAL
-    | BOOL_VAL
+    STRING_VAL      { $$ = new FngLiteral<std::string>(Types::STRING, *$1); }
+    | INT_VAL       { $$ = new FngLiteral<int>(Types::INT, $1); }
+    | FLOAT_VAL     { $$ = new FngLiteral<double>(Types::FLOAT, $1); }
+    | CHAR_VAL      { $$ = new FngLiteral<char>(Types::CHAR, $1); }
+    | BOOL_VAL      { $$ = new FngLiteral<bool>(Types::BOOL, $1); }
     ;
 
 rvalue_list:
@@ -145,28 +152,28 @@ fun_call:
     ;
 
 expr:
-    rvalue                       
-    | expr PLUS expr             
-    | expr MINUS expr            
-    | expr TIMES expr            
-    | expr DIVIDE expr           
-    | expr MOD expr              
-    | expr EQ expr               
-    | expr NOT_EQ expr           
-    | expr LT expr               
-    | expr GT expr               
-    | expr LT_EQ expr            
-    | expr GT_EQ expr            
-    | MINUS expr                 
-    | PLUS expr                  
-    | NOT expr                   
-    | IF expr THEN expr ELSE expr
-    | INCREMENT lvalue           
-    | DECREMENT lvalue           
-    | lvalue INCREMENT           
-    | lvalue DECREMENT           
+    rvalue                          { $$ = $1; }
+    | expr PLUS expr                { $$ = new BinaryExpression($1, Operators::PLUS, $3); }     
+    | expr MINUS expr               { $$ = new BinaryExpression($1, Operators::MINUS, $3); }
+    | expr TIMES expr               { $$ = new BinaryExpression($1, Operators::TIMES, $3); }
+    | expr DIVIDE expr              { $$ = new BinaryExpression($1, Operators::DIVIDE, $3); }
+    | expr MOD expr                 { $$ = new BinaryExpression($1, Operators::MOD, $3); }
+    | expr EQ expr                  { $$ = new BinaryExpression($1, Operators::EQ, $3); }
+    | expr NOT_EQ expr              { $$ = new BinaryExpression($1, Operators::NOT_EQ, $3); }
+    | expr LT expr                  { $$ = new BinaryExpression($1, Operators::LT, $3); }
+    | expr GT expr                  { $$ = new BinaryExpression($1, Operators::GT, $3); }
+    | expr LT_EQ expr               { $$ = new BinaryExpression($1, Operators::LT_EQ, $3); }
+    | expr GT_EQ expr               { $$ = new BinaryExpression($1, Operators::GT_EQ, $3); }
+    | MINUS expr                    { $$ = new PreUnaryExpression($2, Operators::MINUS); }
+    | PLUS expr                     { $$ = new PreUnaryExpression($2, Operators::PLUS); }
+    | NOT expr                      { $$ = new PreUnaryExpression($2, Operators::NOT); }
+    | IF expr THEN expr ELSE expr   { $$ = new TrinaryExpression($2, $4, $6); }
+    | INCREMENT lvalue              { $$ = new PreUnaryExpression($2, Operators::INCREMENT); }
+    | DECREMENT lvalue              { $$ = new PreUnaryExpression($2, Operators::DECREMENT); }
+    | lvalue INCREMENT              { $$ = new PostUnaryExpression($1, Operators::INCREMENT); }
+    | lvalue DECREMENT              { $$ = new PostUnaryExpression($1, Operators::DECREMENT); }
     | fun_call
-    | OPAREN expr CPAREN         
+    | OPAREN expr CPAREN            { $$ = $2; }      
     ;
 
 param:
@@ -175,16 +182,16 @@ param:
     ;
 
 param_list:
-    param                   { $$ = new ParameterList(); $$->push_back($1); DEBUG(*$1);}
-    | param_list param      { $$ = $1; $$->push_back($2); DEBUG(*$2); }
+    param                   { $$ = new ParameterList(); $$->push_back($1);}
+    | param_list param      { $$ = $1; $$->push_back($2);  }
     ;
 
 typed_identifier:
-    OPAREN identifier COLON type CPAREN   { $2->setType($4); $$ = $2; DEBUG(*$$); }  
+    OPAREN identifier COLON type CPAREN   { $2->setType($4); $$ = $2;  }  
     ;
 
 identifier:
-    IDENT               { $$ = new Identifier(std::string($1), Types::INFER); DEBUG(*$$); }
+    IDENT               { $$ = new Identifier(std::string($1), Types::INFER);  }
     ;
 
 type:
