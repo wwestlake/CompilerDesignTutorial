@@ -8,6 +8,8 @@
 #include "../fungeon/utils.h"
 #include "../fungeon/fungeon_ast.h"
 #include "../build/fungeon/fungeon_parser.hpp"
+#include "../fungeon/visitor.h"
+#include "../fungeon/pretty_print.h"
 
 extern FILE* fungeon_in;
 
@@ -96,6 +98,8 @@ int _main(int argc, char ** argv)
     return 0;
 }
 
+extern FngNodeList* fng_nodes;
+
 
 int main(int ac, char ** av)
 {
@@ -115,7 +119,16 @@ int main(int ac, char ** av)
     }       
 
     fungeon_in = input;
+
+
+
     fungeon_parse();
+
+    Visitor* visitor = new PrettyPrint();
+
+    for (Visitable* v : *fng_nodes) {
+        visitor->Visit(v);
+    }
 
 
      return 0;

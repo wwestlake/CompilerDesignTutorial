@@ -3,8 +3,7 @@
 
 #include <ostream>
 #include <vector>
-
-class Visitor;
+#include "visitable.h"
 
 enum class Types {
     INT, 
@@ -80,35 +79,32 @@ static std::string operator_to_string(Operators op)
 }
 
 
-class FngNode {
+class FngNode : public Visitable {
 public:
-
-    virtual void accept(Visitor* visitor) = 0;
-
-    virtual std::ostream& out(std::ostream& os) const = 0;    
-
-    friend std::ostream& operator<<(std::ostream& os, const FngNode& node)
-    {
-        return node.out(os);
-    }
-
-
 };
 
+typedef std::vector<FngNode*> FngNodeList;
 
-class Expression : public FngNode {};
+
+class Expression : public FngNode 
+{
+};
 
 
 class RValue : public Expression {
-
 };
+
+typedef std::vector<RValue*> RValueList;
 
 class LValue : public RValue {
 
 };
 
+
+class FngLiteralBase : public RValue {};
+
 template <typename T> 
-class FngLiteral : public RValue {
+class FngLiteral : public FngLiteralBase {
 protected:
     Types _type;
     T _value;
@@ -119,15 +115,9 @@ public:
     Types getType() { return _type; }
     T getValue() { return _value; }
 
-    virtual void accept(Visitor* visitor) {}
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        os << "(" << type_to_string(_type) << ": " << _value << ")";
-        return os;
-    }    
+    virtual void accept(Visitor* visitor);
 
 };
-
 
 
 class Identifier : public LValue {
@@ -142,30 +132,32 @@ public:
     Types getType() { return _type; }
     void setType(Types type) { _type = type; }
 
-    virtual void accept(Visitor* visitor) {}
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        os <<  "(" <<  _ident << " : " << type_to_string(_type) << ")" << std::endl;
-        return os;
-    }    
-   
+    virtual void accept(Visitor* visitor);
 
 };
+
 
 class Parameter : public Identifier {
 public:
     Parameter(std::string ident, Types type) : Identifier(ident, type) {}
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        os <<  "param (" <<  _ident << " : " << type_to_string(_type) << ")" << std::endl;
-        return os;
-    }    
-
-    virtual void accept(Visitor* visitor) {}
+    virtual void accept(Visitor* visitor);
 
 };
 
 typedef std::vector<Parameter*> ParameterList;
+
+
+
+class FunctionCall : public RValue {
+protected:
+    std::string _ident;
+    RValueList* _args;
+
+
+public:
+    FunctionCall(std::string ident, RValueList* args) : _ident(ident), _args(args) {}
+    virtual void accept(Visitor* visitor);
+};
 
 
 class BinaryExpression : public Expression {
@@ -181,16 +173,7 @@ public:
     Expression* getLeft() { return _left; }
     Expression* getRight() { return _right; }
     Operators getOperator() { return _operator; }
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        _left->out(os) << " " << operator_to_string(_operator);
-        _right->out(os);
-        return os;
-    }    
-
-    virtual void accept(Visitor* visitor) {}
-
-
+    virtual void accept(Visitor* visitor);
 };
 
 class UnaryExpression : public Expression 
@@ -206,28 +189,14 @@ public:
 class PreUnaryExpression : public UnaryExpression {
 public:
     PreUnaryExpression(Expression* expr, Operators op) : UnaryExpression(expr, op) {}
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        operator_to_string(_operator);
-        _expr->out(os);
-        return os;
-    }    
-
-    virtual void accept(Visitor* visitor) {}
+    virtual void accept(Visitor* visitor);
 
 };
 
 class PostUnaryExpression : public UnaryExpression {
 public:
     PostUnaryExpression(Expression* expr, Operators op) : UnaryExpression(expr, op) {}
-
-    virtual std::ostream& out(std::ostream& os) const override {
-        _expr->out(os);
-        operator_to_string(_operator);
-        return os;
-    }    
-
-    virtual void accept(Visitor* visitor) {}
+    virtual void accept(Visitor* visitor);
 
 };
 
@@ -241,25 +210,26 @@ public:
     TrinaryExpression(Expression* condition, Expression* true_expr, Expression* false_expr) 
         : _condition(condition), _true_expr(true_expr), _false_expr(false_expr) {}
 
-    virtual std::ostream& out(std::ostream& os) const override {
-        os << "IF ";
-        _condition->out(os);
-        os << " THEN ";
-        _true_expr->out(os);
-        os << " ELSE ";
-        _false_expr->out(os);
-        return os;
-    }    
-
-    virtual void accept(Visitor* visitor) {}
-
+    virtual void accept(Visitor* visitor);
 
 };
 
-class FunctionCall : public RValue {
+class LetStatement : public FngNode {
 protected:
+    std::string _ident;
+    ParameterList* _params;
+    FngNodeList* _nodes;
+public:
+    LetStatement(std::string ident, ParameterList* params, FngNodeList* nodes) : _ident(ident), _params(params), _nodes(nodes) {}
+
+    virtual void accept(Visitor* visitor);
+
+    std::string getIdent() { return _ident; }
+    ParameterList* getParams() { return _params; }
+    FngNodeList* getNodes() { return _nodes; }
 
 };
+
 
 
 #endif // !__FUNGEON_H

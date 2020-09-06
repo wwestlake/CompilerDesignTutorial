@@ -37,6 +37,8 @@ int fungeon_warning(const char *p)
 int fungeon_lex(); 
 
 
+FngNodeList* fng_nodes = new FngNodeList();
+
 %}
 
 %locations
@@ -62,7 +64,11 @@ int fungeon_lex();
     Expression* expression;
     LValue* lvalue;
     RValue* rvalue;
-
+    FunctionCall* fun_call;
+    RValueList* rvalue_list;
+    LetStatement* let_statement;
+    FngNode* node;
+    FngNodeList* node_list;
 };
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA
@@ -86,7 +92,11 @@ int fungeon_lex();
 %type<expression> expr
 %type<lvalue> lvalue 
 %type<rvalue> rvalue literal
-
+%type<fun_call> fun_call
+%type<rvalue_list> rvalue_list
+%type<let_statement> let_statement
+%type<node> line
+%type<node_list> program body stmt_list
 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
@@ -97,39 +107,39 @@ int fungeon_lex();
 
 program:
     /* empty */
-    | program line
+    | program line                      { fng_nodes->push_back($2); }
     | error
     ;
 
 line:
-    let_statement
-    | fun_call
-    | expr
+    let_statement                       { $$ = $1; }
+    | fun_call                          { $$ = $1; }
+    | expr                              { $$ = $1; }
     ;
 
 let_statement:
-    LET IDENT ASSIGN body
-    | LET IDENT param_list ASSIGN body
+    LET IDENT ASSIGN body               { $$ = new LetStatement($2, nullptr, $4); }
+    | LET IDENT param_list ASSIGN body  { $$ = new LetStatement($2, $3, $5); }
     ;
 
 body:
-    line
-    | OBRACE stmt_list CBRACE
+    line                        { $$ = new FngNodeList(); $$->push_back($1); }
+    | OBRACE stmt_list CBRACE   { $$ = $2; }
     ;
 
 stmt_list:
-    line
-    | stmt_list line
+    line                { $$ = new FngNodeList(); $$->push_back($1); }
+    | stmt_list line    { $$ = $1; $$->push_back($2); }
     ;
 
  lvalue:
-    identifier
+    identifier      { $$ = $1; }
     ;
 
 rvalue:
-    lvalue
-    | literal
-    | fun_call
+    lvalue          { $$ = $1; }
+    | literal       { $$ = $1; }
+    | fun_call      { $$ = $1; }
     ;
 
 literal:
@@ -141,14 +151,14 @@ literal:
     ;
 
 rvalue_list:
-    rvalue
-    | rvalue_list rvalue
+    rvalue                          { $$ = new RValueList(); $$->push_back($1); }
+    | rvalue_list rvalue            { $$ = $1; $$->push_back($2); }
     ;
 
 fun_call:                   
-    IDENT unit                     
-    | IDENT rvalue_list             
-    | OPAREN fun_call CPAREN        
+    IDENT unit                      { $$ = new FunctionCall($1, nullptr); }
+    | IDENT rvalue_list             { $$ = new FunctionCall($1, $2); }
+    | OPAREN fun_call CPAREN        { $$ = $2; }   
     ;
 
 expr:
@@ -172,7 +182,7 @@ expr:
     | DECREMENT lvalue              { $$ = new PreUnaryExpression($2, Operators::DECREMENT); }
     | lvalue INCREMENT              { $$ = new PostUnaryExpression($1, Operators::INCREMENT); }
     | lvalue DECREMENT              { $$ = new PostUnaryExpression($1, Operators::DECREMENT); }
-    | fun_call
+    | fun_call                      { $$ = $1; }
     | OPAREN expr CPAREN            { $$ = $2; }      
     ;
 
@@ -210,11 +220,10 @@ type:
     ;
 
 
-
-
-
-
 %%
+
+
+
 
 
 

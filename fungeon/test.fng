@@ -3,6 +3,14 @@
 
 let compute (a:float) (b:float) =  a * b
 
+let test  = {
+    let test2 a b = {
+        a + b
+    }
+
+    test2 1 2
+}
+
 
 
     
