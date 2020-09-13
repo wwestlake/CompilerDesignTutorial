@@ -21,7 +21,7 @@ std::string filename;
 int fungeon_error(const char *p) 
 { 
     
-    std::cerr << "fungeon: Error! - In file: " << filename << ": On line: " << fungeon_lloc.last_line << " (" << p << ")" <<  std::endl; 
+    std::cerr << "fungeon: Error! - In file: " << filename << ": in column: " << fungeon_lloc.last_column <<  " On line: " << fungeon_lloc.last_line << " (" << p << ")" <<  std::endl; 
     errors = true;
     return 0;
 }
@@ -73,7 +73,7 @@ FngNodeList* fng_nodes = new FngNodeList();
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
-%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE
+%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT
 
 %token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T RECORD_T ENUM_T FUNC_T  
 
@@ -106,15 +106,16 @@ FngNodeList* fng_nodes = new FngNodeList();
 %%
 
 program:
-    /* empty */
+    /* empty */                         {  }
     | program line                      { fng_nodes->push_back($2); }
-    | error
+    | error                             {  }
     ;
 
 line:
     let_statement                       { $$ = $1; }
     | fun_call                          { $$ = $1; }
     | expr                              { $$ = $1; }
+    | line SEMI_COLON                   { $$ = $1; }    
     ;
 
 let_statement:
@@ -132,15 +133,6 @@ stmt_list:
     | stmt_list line    { $$ = $1; $$->push_back($2); }
     ;
 
- lvalue:
-    identifier      { $$ = $1; }
-    ;
-
-rvalue:
-    lvalue          { $$ = $1; }
-    | literal       { $$ = $1; }
-    | fun_call      { $$ = $1; }
-    ;
 
 literal:
     STRING_VAL      { $$ = new FngLiteral<std::string>(Types::STRING, *$1); }
@@ -150,19 +142,15 @@ literal:
     | BOOL_VAL      { $$ = new FngLiteral<bool>(Types::BOOL, $1); }
     ;
 
-rvalue_list:
-    rvalue                          { $$ = new RValueList(); $$->push_back($1); }
-    | rvalue_list rvalue            { $$ = $1; $$->push_back($2); }
-    ;
 
 fun_call:                   
-    IDENT unit                      { $$ = new FunctionCall($1, nullptr); }
-    | IDENT rvalue_list             { $$ = new FunctionCall($1, $2); }
-    | OPAREN fun_call CPAREN        { $$ = $2; }   
+    identifier OPAREN rvalue_list  CPAREN      { $$ = new FunctionCall($1, $3); }
     ;
 
 expr:
-    rvalue                          { $$ = $1; }
+    literal                       { $$ = $1; }
+    | lvalue                        { $$ = $1; }
+    | fun_call                      { $$ = $1; }
     | expr PLUS expr                { $$ = new BinaryExpression($1, Operators::PLUS, $3); }     
     | expr MINUS expr               { $$ = new BinaryExpression($1, Operators::MINUS, $3); }
     | expr TIMES expr               { $$ = new BinaryExpression($1, Operators::TIMES, $3); }
@@ -182,9 +170,25 @@ expr:
     | DECREMENT lvalue              { $$ = new PreUnaryExpression($2, Operators::DECREMENT); }
     | lvalue INCREMENT              { $$ = new PostUnaryExpression($1, Operators::INCREMENT); }
     | lvalue DECREMENT              { $$ = new PostUnaryExpression($1, Operators::DECREMENT); }
-    | fun_call                      { $$ = $1; }
     | OPAREN expr CPAREN            { $$ = $2; }      
     ;
+
+lvalue:
+    identifier      { $$ = $1; }
+    ;
+
+
+rvalue_list:
+    rvalue                         { $$ = new RValueList(); $$->push_back($1); }
+    | rvalue_list COMMA rvalue     { $$ = $1; $$->push_back($3); }
+    ;
+
+
+rvalue:
+    expr                            { $$ = new RValue($1); }
+    | OPAREN rvalue CPAREN          { $$ = $2; }
+    ;
+
 
 param:
     identifier                  { $$ = (Parameter*)$1; }
@@ -194,6 +198,7 @@ param:
 param_list:
     param                   { $$ = new ParameterList(); $$->push_back($1);}
     | param_list param      { $$ = $1; $$->push_back($2);  }
+    | unit                  { $$ = new ParameterList(); }
     ;
 
 typed_identifier:
@@ -216,8 +221,9 @@ type:
     ;
 
  unit:
-    | OPAREN CPAREN { $$ = Types::UNIT; }
+    UNIT { $$ = Types::UNIT; }
     ;
+
 
 
 %%

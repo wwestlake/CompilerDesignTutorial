@@ -21,6 +21,7 @@ extern void cmd_switch_to_buffer(YY_BUFFER_STATE buffer);
 int cmderror(const char * p)
 {
     cerr << p << endl;
+    return 0;
 }
 
 std::vector<Node*> nodes;

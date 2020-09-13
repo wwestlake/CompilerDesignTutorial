@@ -61,15 +61,13 @@ static std::string startRoom;
 %token<str> T_STRING
 %token<str> T_TEXT
 
-%type<floatval> float_expr
-%type<intval> int_expr
 %type<ident_list> ident_list_items
 %type<ident_list> ident_list
 %type<text> text
 %type<text> display_name
 %type<ident_list> item_list
 %type<ident_list> exit_list
-%type<room> room room_item room_items
+%type<room> room
 %type<item> unique_item item
 %type<dungeon> dungeon
 %type<node> description dungeon_item

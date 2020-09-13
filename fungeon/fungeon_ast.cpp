@@ -26,3 +26,7 @@ void PostUnaryExpression::accept(Visitor* visitor) { visitor->Visit(this); }
 void TrinaryExpression::accept(Visitor* visitor) { visitor->Visit(this); }
 void LetStatement::accept(Visitor* visitor) { visitor->Visit(this); }
 
+void RValue::accept(Visitor* visitor) { visitor->Visit(this); }
+void Error::accept(Visitor* visitor) { visitor->Visit(this); }
+
+

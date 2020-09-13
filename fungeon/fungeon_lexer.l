@@ -163,13 +163,13 @@ QUEST "?"
 {COLON}             { return COLON; }
 {QUEST}             { return QUEST; }
 
+"()"                { return UNIT; }
 "("                 { return OPAREN; }
 ")"                 { return CPAREN; }
 "{"                 { return OBRACE; }
 "}"                 { return CBRACE; }
 ","                 { return COMMA; }
 ";"                 { return SEMI_COLON; }
-
 
 
 {SYM}               { fungeon_lval.symbol = strdup( yytext ); return IDENT; }

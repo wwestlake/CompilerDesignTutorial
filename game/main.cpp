@@ -128,6 +128,7 @@ int main(int ac, char ** av)
 
     for (Visitable* v : *fng_nodes) {
         visitor->Visit(v);
+        std::cout << std::endl;
     }
 
 

@@ -3,17 +3,27 @@
 
 let compute (a:float) (b:float) =  a * b
 
-let test  = {
+let test q r = {
     let test2 a b = {
         a + b
     }
 
-    test2 1 2
+    if a then test2 (a, b) else b
+}
+
+let r = 3
+
+let fibonacci n = {
+    if n < 3 then 1 else fibonacci(n-1)  + fibonacci(n - 2);
 }
 
 
+let start () = {
+    fibonacci(25);
+    compute(3, 2);
+    test(4, 5);
+}
 
-    
 
 
 

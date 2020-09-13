@@ -75,12 +75,23 @@ static std::string operator_to_string(Operators op)
         case Operators::NOT:            return std::string("!");
         case Operators::INCREMENT:      return std::string("++");
         case Operators::DECREMENT:      return std::string("--");      
-    }    
+    }
+    return "";    
 }
 
 
 class FngNode : public Visitable {
 public:
+};
+
+class Error : public FngNode {
+    int _col;
+    int _line;
+    std::string _message;
+protected:
+    Error(int col, int line, std::string message) : _col(col), _line(line), _message(message) {}
+    virtual void accept(Visitor* visitor);
+
 };
 
 typedef std::vector<FngNode*> FngNodeList;
@@ -92,12 +103,21 @@ class Expression : public FngNode
 
 
 class RValue : public Expression {
+private:
+    Expression* _expr = nullptr;
+public:
+    RValue() {};
+    RValue(Expression* expr) : _expr(expr) {}
+
+    Expression* getExpr() { return _expr; }
+
+    virtual void accept(Visitor* visitor);
+
 };
 
 typedef std::vector<RValue*> RValueList;
 
 class LValue : public RValue {
-
 };
 
 
@@ -110,7 +130,9 @@ protected:
     T _value;
 
 public:
+    FngLiteral() : _type(Types::UNIT) {}
     FngLiteral(Types type, T value) : _type(type), _value(value) {}
+
 
     Types getType() { return _type; }
     T getValue() { return _value; }
@@ -118,6 +140,7 @@ public:
     virtual void accept(Visitor* visitor);
 
 };
+
 
 
 class Identifier : public LValue {
@@ -150,13 +173,15 @@ typedef std::vector<Parameter*> ParameterList;
 
 class FunctionCall : public RValue {
 protected:
-    std::string _ident;
-    RValueList* _args;
+    Identifier* _ident;
+    RValueList* _args = nullptr;
 
 
 public:
-    FunctionCall(std::string ident, RValueList* args) : _ident(ident), _args(args) {}
+    FunctionCall(Identifier* ident, RValueList* args) : _ident(ident), _args(args) {}
     virtual void accept(Visitor* visitor);
+    Identifier* getIdent() { return _ident; }
+    RValueList* getArgs() { return _args; }
 };
 
 
@@ -190,6 +215,8 @@ class PreUnaryExpression : public UnaryExpression {
 public:
     PreUnaryExpression(Expression* expr, Operators op) : UnaryExpression(expr, op) {}
     virtual void accept(Visitor* visitor);
+    Expression* getExpr() { return _expr; }
+    Operators getOperator() { return _operator; }
 
 };
 
@@ -197,6 +224,8 @@ class PostUnaryExpression : public UnaryExpression {
 public:
     PostUnaryExpression(Expression* expr, Operators op) : UnaryExpression(expr, op) {}
     virtual void accept(Visitor* visitor);
+    Expression* getExpr() { return _expr; }
+    Operators getOperator() { return _operator; }
 
 };
 
@@ -211,6 +240,9 @@ public:
         : _condition(condition), _true_expr(true_expr), _false_expr(false_expr) {}
 
     virtual void accept(Visitor* visitor);
+    Expression* geCondition() { return _condition; }
+    Expression* getTrueExpr() { return _true_expr; }
+    Expression* getFalseExpr() { return _false_expr; }
 
 };
 

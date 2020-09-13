@@ -13,8 +13,8 @@ public:
     virtual void Visit(BinaryExpression* node) = 0;
     virtual void Visit(PreUnaryExpression* node) = 0;
     virtual void Visit(PostUnaryExpression* node) = 0;
-    virtual void Visit(FngLiteralBase* node) = 0;
     virtual void Visit(TrinaryExpression* node) = 0;
+    virtual void Visit(RValue* node) = 0;
 
 
     virtual void Visit(FngLiteral<bool>* node) = 0;
