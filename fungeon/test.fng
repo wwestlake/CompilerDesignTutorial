@@ -8,8 +8,12 @@ let test q r = {
         a + b
     }
 
-    if a then test2 (a, b) else b
+    if a then test2(a, b) else b
 }
+
+let str = "this is a string"
+let chr = 'a'
+
 
 let r = 3
 
@@ -22,6 +26,10 @@ let start () = {
     fibonacci(25);
     compute(3, 2);
     test(4, 5);
+    print "This is a test";
+    print 1 + 2;
+    print 7/5;
+    print a;
 }
 
 

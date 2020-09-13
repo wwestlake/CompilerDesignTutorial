@@ -29,7 +29,7 @@ public:
     virtual void Visit(Parameter* node) override                
     { 
         PRT("parameter");
-        std::cout << "(" << node->getIdent() << " : " << type_to_string( node->getType() ) << ")";
+        std::cout << "(" << node->getIdent()->getIdent() << " : " << type_to_string( node->getType() ) << ")";
     }
 
     virtual void Visit(RValue* node) override 
@@ -79,6 +79,13 @@ public:
         std::cout << "}" << std::endl;
 
     }
+
+    virtual void Visit(PrintStatement* node) override 
+    {
+        std::cout << "print ";
+        node->getExpr()->accept(this);
+    }
+
     virtual void Visit(BinaryExpression* node) override         
     { 
         PRT("binary expression");

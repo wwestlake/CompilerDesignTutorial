@@ -67,6 +67,7 @@ FngNodeList* fng_nodes = new FngNodeList();
     FunctionCall* fun_call;
     RValueList* rvalue_list;
     LetStatement* let_statement;
+    PrintStatement* print_statement;
     FngNode* node;
     FngNodeList* node_list;
 };
@@ -75,7 +76,7 @@ FngNodeList* fng_nodes = new FngNodeList();
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
 %token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT
 
-%token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T RECORD_T ENUM_T FUNC_T  
+%token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T RECORD_T ENUM_T FUNC_T PRINT_T 
 
 %token<op_val> OP SCOPE_OP
 %token<symbol> IDENT
@@ -95,6 +96,7 @@ FngNodeList* fng_nodes = new FngNodeList();
 %type<fun_call> fun_call
 %type<rvalue_list> rvalue_list
 %type<let_statement> let_statement
+%type<print_statement> print_statement
 %type<node> line
 %type<node_list> program body stmt_list
 
@@ -114,8 +116,13 @@ program:
 line:
     let_statement                       { $$ = $1; }
     | fun_call                          { $$ = $1; }
+    | print_statement                   { $$ = $1; }
     | expr                              { $$ = $1; }
     | line SEMI_COLON                   { $$ = $1; }    
+    ;
+
+print_statement:
+    PRINT_T expr                        { $$ = new PrintStatement($2); }
     ;
 
 let_statement:
@@ -191,8 +198,8 @@ rvalue:
 
 
 param:
-    identifier                  { $$ = (Parameter*)$1; }
-    | typed_identifier          { $$ = (Parameter*)$1; }
+    identifier                  { $$ = new Parameter($1, Types::INFER); }
+    | typed_identifier          { $$ = new Parameter($1, $1->getType()); }
     ;
 
 param_list:

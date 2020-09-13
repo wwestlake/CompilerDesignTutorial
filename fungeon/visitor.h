@@ -10,6 +10,7 @@ public:
     virtual void Visit(Parameter* node) = 0 ;
     virtual void Visit(FunctionCall* node) = 0;
     virtual void Visit(LetStatement* node) = 0;
+    virtual void Visit(PrintStatement* node) = 0;
     virtual void Visit(BinaryExpression* node) = 0;
     virtual void Visit(PreUnaryExpression* node) = 0;
     virtual void Visit(PostUnaryExpression* node) = 0;

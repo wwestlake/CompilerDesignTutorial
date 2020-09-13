@@ -85,7 +85,7 @@ QUEST "?"
 <string_st>\n          { fungeon_lval.error_message = error("newline in string"); return ERROR; }
 
 
-\''                     { BEGIN string_st; ClearBuffer(strbuf); }
+\''                     { BEGIN char_st; ClearBuffer(strbuf); }
 <char_st>[^\\"\n]{1}   { AppendBufferString(strbuf, yytext); }
 <char_st>\\a         { AppendBufferChar(strbuf, '\a'); }
 <char_st>\\b         { AppendBufferChar(strbuf, '\b'); }
@@ -98,9 +98,9 @@ QUEST "?"
 <char_st>\\t         { AppendBufferChar(strbuf, '\t'); }
 <char_st>\\[0-7]*    { AppendBufferChar(strbuf, strtol(yytext+1, 0, 8)); }
 <char_st>\\[\\"]     { AppendBufferChar(strbuf, yytext[1]); }
-<char_st>\''          { fungeon_lval.string_val = new std::string(strdup(getString(strbuf).c_str())); BEGIN 0; return STRING_VAL; }
-<char_st>\\.         { fungeon_lval.error_message = error("bogus escape '%s' in string", yytext); return ERROR; }
-<char_st>\n          { fungeon_lval.error_message = error("newline in string"); return ERROR; }
+<char_st>\''          { fungeon_lval.char_val = strbuf[0]; BEGIN 0; return CHAR_VAL; }
+<char_st>\\.         { fungeon_lval.error_message = error("bogus escape '%s' in character", yytext); return ERROR; }
+<char_st>\n          { fungeon_lval.error_message = error("newline in character"); return ERROR; }
 
 
 "/*"                { BEGIN b_comment; }
@@ -134,7 +134,7 @@ QUEST "?"
 "bool"              { return BOOL_T;    }
 "record"            { return RECORD_T;  }
 "enum"              { return ENUM_T;    }
-
+"print"             { return PRINT_T; }
 
 "++"                { return INCREMENT; }
 "--"                { return DECREMENT; }

@@ -84,15 +84,15 @@ class FngNode : public Visitable {
 public:
 };
 
-class Error : public FngNode {
-    int _col;
-    int _line;
-    std::string _message;
-protected:
-    Error(int col, int line, std::string message) : _col(col), _line(line), _message(message) {}
-    virtual void accept(Visitor* visitor);
-
-};
+//class Error : public FngNode {
+//    int _col;
+//    int _line;
+//    std::string _message;
+//protected:
+//    Error(int col, int line, std::string message) : _col(col), _line(line), _message(message) {}
+//    virtual void accept(Visitor* visitor);
+//
+//};
 
 typedef std::vector<FngNode*> FngNodeList;
 
@@ -161,9 +161,16 @@ public:
 
 
 class Parameter : public Identifier {
+private:
+    Identifier* _ident;
+
 public:
-    Parameter(std::string ident, Types type) : Identifier(ident, type) {}
+    Parameter(Identifier* ident, Types type) : Identifier(ident->getIdent(), type), _ident(ident) {}
     virtual void accept(Visitor* visitor);
+
+    Identifier* getIdent() {
+        return _ident;
+    }
 
 };
 
@@ -262,6 +269,13 @@ public:
 
 };
 
-
+class PrintStatement : public FngNode {
+protected:
+    Expression* _expr;
+public:
+    PrintStatement(Expression* expr) : _expr(expr) {}
+    virtual void accept(Visitor* visitor);
+    Expression* getExpr() { return _expr; }
+};
 
 #endif // !__FUNGEON_H
