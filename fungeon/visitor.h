@@ -16,7 +16,8 @@ public:
     virtual void Visit(PostUnaryExpression* node) = 0;
     virtual void Visit(TrinaryExpression* node) = 0;
     virtual void Visit(RValue* node) = 0;
-
+    virtual void Visit(Tuple* node) = 0;
+    virtual void Visit(List* node) = 0;
 
     virtual void Visit(FngLiteral<bool>* node) = 0;
     virtual void Visit(FngLiteral<char>* node) = 0;
@@ -24,6 +25,7 @@ public:
     virtual void Visit(FngLiteral<int>* node) = 0;
     virtual void Visit(FngLiteral<std::string>* node) = 0;
 
+    virtual void Visit(Record* node) = 0;
 
 
     void Visit(Visitable* root)

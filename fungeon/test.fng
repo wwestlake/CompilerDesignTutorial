@@ -12,8 +12,21 @@ let test q r = {
 }
 
 let str = "this is a string"
-let chr = 'a'
 
+let chr1 = 'a'
+let chr2 = '"'
+let chr3 = '\n'
+let chr4 = '\t'
+let chr5 = '\077'
+let chr6 = '\r'
+let chr7 = '\v'
+let chr8 = '\''
+
+let a = (1,2,'a',"this is a string", "a tuple", 42.5, an_identifier)
+
+let mylist = [1, 2, 3, 4, 5]
+
+let myOtherList = [3.5, 4.5, 42.2]
 
 let r = 3
 
@@ -32,7 +45,14 @@ let start () = {
     print a;
 }
 
+type MyRecord = {
+    a : int;
+    b : string;
+    c : char;
+    d : float;
+    e : bool;
+    f : byte;
 
-
+}
 
 

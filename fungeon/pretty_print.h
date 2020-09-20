@@ -6,6 +6,22 @@
 //#define PRT(A) std::cout << A << std::endl
 #define PRT(A) do {} while (false)
 
+std::string reescape(char c)
+{
+    switch (c)
+    {
+        case '\n' : return "\\n";
+        case '\t' : return "\\t";
+        case '\v' : return "\\v";
+    }
+
+    std::string result;
+
+    result[0] = c;
+    return result;
+}
+
+
 class PrettyPrint : public Visitor {
     int _indent = 0;
     int _indent_inc = 4;
@@ -38,6 +54,41 @@ public:
         if (node->getExpr() != nullptr)
             node->getExpr()->accept(this);
     }
+
+    virtual void Visit(Tuple* node) override 
+    {
+        std::cout << "(";
+        int len = node->getRValues()->size();
+        int i = 0;
+        for (auto n : *node->getRValues())
+        {
+            i++;
+            n->accept(this);
+            if (i < len) 
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << ")";
+    }
+
+    virtual void Visit(List* node) override 
+    {
+        std::cout << "[";
+        int len = node->getRValues()->size();
+        int i = 0;
+        for (auto n : *node->getRValues())
+        {
+            i++;
+            n->accept(this);
+            if (i < len) 
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "]";
+    }
+
 
     virtual void Visit(FunctionCall* node) override             
     { 
@@ -119,31 +170,48 @@ public:
 
     }
 
-    virtual void Visit(FngLiteral<bool>* node) 
+    virtual void Visit(FngLiteral<bool>* node)  override
     {
         PRT("literal bool");
         std::cout << node->getValue();
     }
-    virtual void Visit(FngLiteral<char>* node) 
+
+
+
+    virtual void Visit(FngLiteral<char>* node)  override
     {
         PRT("literal char");
-        std::cout << node->getValue();
+        std::cout << "'" << reescape( node->getValue() ) << "'";
     }
-    virtual void Visit(FngLiteral<double>* node) 
+    virtual void Visit(FngLiteral<double>* node)  override
     {
         PRT("literal double");
         std::cout << node->getValue();
     }
-    virtual void Visit(FngLiteral<int>* node) 
+    virtual void Visit(FngLiteral<int>* node)  override
     {
         PRT("literal int");
         std::cout << node->getValue();
     }
-    virtual void Visit(FngLiteral<std::string>* node) 
+    virtual void Visit(FngLiteral<std::string>* node)  override
     {
         PRT("literal string");
        std::cout << node->getValue();
     }
+
+    virtual void Visit(Record* node)  override
+    {
+        std::cout << "type " << node->getIdent()->getIdent() << " = {" << std::endl;
+        push_indent();
+        for (auto n : *node->getFieldList())
+        {
+            indent();
+            std::cout << n->getIdent()->getIdent() << " : " << type_to_string( n->getType() ) << ";" << std::endl;
+        }
+        pop_indent();
+        std::cout << "}";
+    }
+
 
 };
 

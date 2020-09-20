@@ -28,4 +28,6 @@ void LetStatement::accept(Visitor* visitor) { visitor->Visit(this); }
 
 void RValue::accept(Visitor* visitor) { visitor->Visit(this); }
 void PrintStatement::accept(Visitor* visitor) { visitor->Visit(this); }
-
+void Tuple::accept(Visitor* visitor)  { visitor->Visit(this); }
+void List::accept(Visitor* visitor)  { visitor->Visit(this); }
+void Record::accept(Visitor* visitor)  { visitor->Visit(this); }

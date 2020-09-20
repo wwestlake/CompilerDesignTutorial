@@ -70,16 +70,22 @@ FngNodeList* fng_nodes = new FngNodeList();
     PrintStatement* print_statement;
     FngNode* node;
     FngNodeList* node_list;
+    Tuple* tuple;
+    List* list;
+    RecordField* record_field;
+    RecordFieldList* record_field_list;
+    Record* record;
 };
 
-%token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA
+%token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA OBRACKET CBRACKET
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
 %token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT
 
-%token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T RECORD_T ENUM_T FUNC_T PRINT_T 
+%token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T FUNC_T PRINT_T 
 
 %token<op_val> OP SCOPE_OP
 %token<symbol> IDENT
+%token<symbol> TYPE_IDENT
 %token<string_val>  STRING_VAL  
 %token<inum_val>    INT_VAL     
 %token<fnum_val>    FLOAT_VAL   
@@ -94,11 +100,18 @@ FngNodeList* fng_nodes = new FngNodeList();
 %type<lvalue> lvalue 
 %type<rvalue> rvalue literal
 %type<fun_call> fun_call
-%type<rvalue_list> rvalue_list
+%type<rvalue_list> rvalue_list tuple_pair tuple_rvalue_list
 %type<let_statement> let_statement
 %type<print_statement> print_statement
 %type<node> line
 %type<node_list> program body stmt_list
+%type<tuple> tuple
+%type<list> list
+
+%type<record_field> record_field
+%type<record_field_list> record_field_list
+%type<record> record
+
 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
@@ -118,7 +131,8 @@ line:
     | fun_call                          { $$ = $1; }
     | print_statement                   { $$ = $1; }
     | expr                              { $$ = $1; }
-    | line SEMI_COLON                   { $$ = $1; }    
+    | line SEMI_COLON                   { $$ = $1; }
+    | record                            { $$ = $1; }
     ;
 
 print_statement:
@@ -177,7 +191,10 @@ expr:
     | DECREMENT lvalue              { $$ = new PreUnaryExpression($2, Operators::DECREMENT); }
     | lvalue INCREMENT              { $$ = new PostUnaryExpression($1, Operators::INCREMENT); }
     | lvalue DECREMENT              { $$ = new PostUnaryExpression($1, Operators::DECREMENT); }
-    | OPAREN expr CPAREN            { $$ = $2; }      
+    | OPAREN expr CPAREN            { $$ = $2; }
+    | tuple                         { $$ = $1; }
+    | list                          { $$ = $1; }
+      
     ;
 
 lvalue:
@@ -194,6 +211,24 @@ rvalue_list:
 rvalue:
     expr                            { $$ = new RValue($1); }
     | OPAREN rvalue CPAREN          { $$ = $2; }
+    ;
+
+tuple_pair:
+    rvalue COMMA rvalue             { $$ = new RValueList(); $$->push_back($1); $$->push_back($3); }    
+    ;
+
+tuple_rvalue_list:
+    tuple_pair                      { $$ = $1; }
+    | tuple_rvalue_list COMMA rvalue { $$ = $1; $$->push_back($3); }
+    ;
+
+tuple:
+    OPAREN tuple_rvalue_list CPAREN { $$ = new Tuple($2); }
+    ;
+
+list:
+    OBRACKET CBRACKET                   { $$ = new List(); }
+    | OBRACKET rvalue_list CBRACKET     { $$ = new List($2); }
     ;
 
 
@@ -217,15 +252,31 @@ identifier:
     ;
 
 type:
-    INT_T               { $$ = Types::UNIT;     }
+    INT_T               { $$ = Types::INT;     }
     | FLOAT_T           { $$ = Types::FLOAT;    }
     | STRING_T          { $$ = Types::STRING;   }    
     | CHAR_T            { $$ = Types::CHAR;     }
     | BYTE_T            { $$ = Types::BYTE;     }    
     | BOOL_T            { $$ = Types::BOOL;     }
-    | RECORD_T          { $$ = Types::RECORD;   }
-    | ENUM_T            { $$ = Types::ENUM;     }
     ;
+
+record_field:
+    identifier COLON type SEMI_COLON    { $$ = new RecordField($1, $3); }
+    ;
+
+record_field_list:
+    record_field                        { $$ = new RecordFieldList(); $$->push_back($1); }
+    | record_field_list record_field    { $$ = $1; $$->push_back($2); }
+    ;
+
+record:
+    TYPE TYPE_IDENT ASSIGN OBRACE record_field_list CBRACE
+        {
+            DEBUG("Found record");
+            $$ = new Record(new Identifier( $2, Types::RECORD ), $5);
+        }
+    ;
+
 
  unit:
     UNIT { $$ = Types::UNIT; }

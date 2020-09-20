@@ -49,7 +49,9 @@ BIN "0"[bB][0-1]+
 EOL [\n\r]
 FLT [0-9]+\.[0-9]*(([e|E][+|-]?)[0-9]+)?
 INT [0-9]+
-SYM [a-zA-Z_]+[a-zA-Z0-9_]*
+SYM [a-z]{1}[a-zA-Z_]*[a-zA-Z0-9_]*
+TYPE_SYM [A-Z]{1}[a-zA-Z_]*[a-zA-Z0-9_]*
+
 BOOL "true"|"false"
 SCOPE_OP "."|"::"
 COLON ":"
@@ -85,8 +87,8 @@ QUEST "?"
 <string_st>\n          { fungeon_lval.error_message = error("newline in string"); return ERROR; }
 
 
-\''                     { BEGIN char_st; ClearBuffer(strbuf); }
-<char_st>[^\\"\n]{1}   { AppendBufferString(strbuf, yytext); }
+\'                     { BEGIN char_st; ClearBuffer(strbuf); }
+<char_st>[^\\'\n]{1}   { AppendBufferChar(strbuf, yytext[0]); }
 <char_st>\\a         { AppendBufferChar(strbuf, '\a'); }
 <char_st>\\b         { AppendBufferChar(strbuf, '\b'); }
 <char_st>\\e         { AppendBufferChar(strbuf, '\e'); }
@@ -97,8 +99,8 @@ QUEST "?"
 <char_st>\\\\        { AppendBufferChar(strbuf, '\\'); }
 <char_st>\\t         { AppendBufferChar(strbuf, '\t'); }
 <char_st>\\[0-7]*    { AppendBufferChar(strbuf, strtol(yytext+1, 0, 8)); }
-<char_st>\\[\\"]     { AppendBufferChar(strbuf, yytext[1]); }
-<char_st>\''          { fungeon_lval.char_val = strbuf[0]; BEGIN 0; return CHAR_VAL; }
+<char_st>\\[\\']     { AppendBufferChar(strbuf, yytext[1]); }
+<char_st>\'          { fungeon_lval.char_val = strbuf[0]; BEGIN 0; return CHAR_VAL; }
 <char_st>\\.         { fungeon_lval.error_message = error("bogus escape '%s' in character", yytext); return ERROR; }
 <char_st>\n          { fungeon_lval.error_message = error("newline in character"); return ERROR; }
 
@@ -132,9 +134,8 @@ QUEST "?"
 "char"              { return CHAR_T;    }
 "byte"              { return BYTE_T;    }
 "bool"              { return BOOL_T;    }
-"record"            { return RECORD_T;  }
-"enum"              { return ENUM_T;    }
 "print"             { return PRINT_T; }
+
 
 "++"                { return INCREMENT; }
 "--"                { return DECREMENT; }
@@ -170,8 +171,10 @@ QUEST "?"
 "}"                 { return CBRACE; }
 ","                 { return COMMA; }
 ";"                 { return SEMI_COLON; }
+"["                 { return OBRACKET; }
+"]"                 { return CBRACKET; }
 
-
+{TYPE_SYM}          { fungeon_lval.symbol = strdup( yytext ); return TYPE_IDENT; }
 {SYM}               { fungeon_lval.symbol = strdup( yytext ); return IDENT; }
 
 

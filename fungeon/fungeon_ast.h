@@ -141,6 +141,30 @@ public:
 
 };
 
+class Tuple : public RValue {
+protected:
+    RValueList* _rvalues;
+public:
+    Tuple(RValueList* rvalues) : _rvalues(rvalues) {}
+
+    RValueList* getRValues() { return _rvalues; }
+    virtual void accept(Visitor* visitor);
+
+};
+
+class List : public RValue {
+protected:
+    RValueList* _rvalues;
+public:
+    List() : _rvalues(new RValueList()) { }
+    List(RValueList* rvalues) : _rvalues(rvalues) {}
+
+    RValueList* getRValues() { return _rvalues; }
+    virtual void accept(Visitor* visitor);
+
+};
+
+
 
 
 class Identifier : public LValue {
@@ -277,5 +301,36 @@ public:
     virtual void accept(Visitor* visitor);
     Expression* getExpr() { return _expr; }
 };
+
+class RecordField {
+protected:
+    Identifier* _ident;
+    Types _type;
+
+public:
+    RecordField(Identifier* ident, Types type) : _ident(ident), _type(type) {}
+
+    Identifier* getIdent() { return _ident; }
+    Types getType() { return _type; }
+};
+
+typedef std::vector<RecordField*> RecordFieldList;
+
+
+class Record : public FngNode {
+protected:
+    Identifier* _ident;
+    RecordFieldList* _field_list;
+public:
+    Record(Identifier* ident, RecordFieldList* field_list) : _ident(ident), _field_list(field_list) {}
+
+    Identifier* getIdent() { return _ident; }
+    RecordFieldList* getFieldList() { return _field_list; }
+
+    virtual void accept(Visitor* visitor);
+
+
+};
+
 
 #endif // !__FUNGEON_H
