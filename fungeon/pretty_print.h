@@ -49,7 +49,6 @@ public:
         int i = 0;
         for (auto n : *node->getTypes())
         {
-
             std::cout << type_to_string( n->getType() );
             i++;
             if (i < len) std::cout << " * ";
