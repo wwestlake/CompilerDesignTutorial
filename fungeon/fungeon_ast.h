@@ -333,4 +333,36 @@ public:
 };
 
 
+class EnumField {
+protected:
+    Identifier* _ident;
+    Types _type;
+
+public:
+    EnumField(Identifier* ident, Types type) : _ident(ident), _type(type) {}
+
+    Identifier* getIdent() { return _ident; }
+    Types getType() { return _type; }
+};
+
+typedef std::vector<EnumField*> EnumFieldList;
+
+
+class Enum : public FngNode {
+protected:
+    Identifier* _ident;
+    EnumFieldList* _field_list;
+public:
+    Enum(Identifier* ident, EnumFieldList* field_list) : _ident(ident), _field_list(field_list) {}
+
+    Identifier* getIdent() { return _ident; }
+    EnumFieldList* getFieldList() { return _field_list; }
+
+    virtual void accept(Visitor* visitor);
+
+
+};
+
+
+
 #endif // !__FUNGEON_H

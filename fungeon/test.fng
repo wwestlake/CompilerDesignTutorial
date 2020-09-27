@@ -45,7 +45,7 @@ let start () = {
     print a;
 }
 
-type MyRecord = {
+record MyRecord = {
     a : int;
     b : string;
     c : char;
@@ -55,4 +55,7 @@ type MyRecord = {
 
 }
 
-
+enumeration MyEnum = {
+    | Value of int;
+    | Error of string;
+}

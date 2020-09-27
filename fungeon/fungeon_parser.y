@@ -72,14 +72,20 @@ FngNodeList* fng_nodes = new FngNodeList();
     FngNodeList* node_list;
     Tuple* tuple;
     List* list;
+
     RecordField* record_field;
     RecordFieldList* record_field_list;
     Record* record;
+
+    EnumField* enum_field;
+    EnumFieldList* enum_field_list;
+    Enum* enumeration;
+
 };
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA OBRACKET CBRACKET
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
-%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT
+%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT RECORD ENUMERATION OF PIPE
 
 %token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T FUNC_T PRINT_T 
 
@@ -112,6 +118,9 @@ FngNodeList* fng_nodes = new FngNodeList();
 %type<record_field_list> record_field_list
 %type<record> record
 
+%type<enum_field> enum_field
+%type<enum_field_list> enum_field_list
+%type<enumeration> enumeration
 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
@@ -133,6 +142,7 @@ line:
     | expr                              { $$ = $1; }
     | line SEMI_COLON                   { $$ = $1; }
     | record                            { $$ = $1; }
+    | enumeration                       { $$ = $1; }
     ;
 
 print_statement:
@@ -270,12 +280,30 @@ record_field_list:
     ;
 
 record:
-    TYPE TYPE_IDENT ASSIGN OBRACE record_field_list CBRACE
+    RECORD TYPE_IDENT ASSIGN OBRACE record_field_list CBRACE
         {
             DEBUG("Found record");
             $$ = new Record(new Identifier( $2, Types::RECORD ), $5);
         }
     ;
+
+enum_field:
+    PIPE TYPE_IDENT SEMI_COLON              { $$ = new EnumField(new Identifier($2, Types::UNIT), Types::UNIT); }
+    | PIPE TYPE_IDENT OF type SEMI_COLON    { $$ = new EnumField(new Identifier($2, $4), $4); }
+    ;
+
+enum_field_list:
+    enum_field                      { $$ = new EnumFieldList(); $$->push_back($1); }
+    | enum_field_list enum_field    { $$ = $1; $$->push_back($2); }
+    ;
+
+enumeration:
+    ENUMERATION TYPE_IDENT ASSIGN OBRACE enum_field_list CBRACE 
+        {
+            $$ = new Enum(new Identifier($2, Types::ENUM), $5);
+        }
+    ;
+
 
 
  unit:

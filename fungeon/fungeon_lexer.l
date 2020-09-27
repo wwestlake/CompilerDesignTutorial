@@ -135,6 +135,9 @@ QUEST "?"
 "byte"              { return BYTE_T;    }
 "bool"              { return BOOL_T;    }
 "print"             { return PRINT_T; }
+"record"            { return RECORD; }
+"enumeration"       { return ENUMERATION; }
+"of"                { return OF; }
 
 
 "++"                { return INCREMENT; }
@@ -159,6 +162,7 @@ QUEST "?"
 "<="                { return LT_EQ; }
 ">"                 { return GT; }
 "<"                 { return LT; }
+"|"                 { return PIPE; }  
 
 {SCOPE_OP}          { fungeon_lval.op_val = yytext; return SCOPE_OP; }
 {COLON}             { return COLON; }

@@ -212,6 +212,18 @@ public:
         std::cout << "}";
     }
 
+    virtual void Visit(Enum* node)  override
+    {
+        std::cout << "type " << node->getIdent()->getIdent() << " = {" << std::endl;
+        push_indent();
+        for (auto n : *node->getFieldList())
+        {
+            indent();
+            std::cout << "| " << n->getIdent()->getIdent() << " : " << type_to_string( n->getType() ) << ";" << std::endl;
+        }
+        pop_indent();
+        std::cout << "}";
+    }
 
 };
 

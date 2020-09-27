@@ -26,6 +26,7 @@ public:
     virtual void Visit(FngLiteral<std::string>* node) = 0;
 
     virtual void Visit(Record* node) = 0;
+    virtual void Visit(Enum* node) = 0;
 
 
     void Visit(Visitable* root)
