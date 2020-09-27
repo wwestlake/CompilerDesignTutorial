@@ -132,8 +132,12 @@ public:
 };
 
 class ListType : public Type {
+protected:
+    Type* _list_type;
 public:
-    ListType() : Type(Types::LIST) {}
+    ListType(Type* list_type) : Type(Types::LIST), _list_type(list_type) {}
+
+    Type* getListType() { return _list_type; }
 
     virtual void accept(Visitor* visitor);
 

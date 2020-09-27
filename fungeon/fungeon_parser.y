@@ -78,11 +78,15 @@ FngNodeList* fng_nodes = new FngNodeList();
     EnumField* enum_field;
     EnumFieldList* enum_field_list;
     Enum* enumeration;
+    ListType* list_decl;
+    TupleType* tuple_decl;
+    TypeList* type_list;
 };
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA OBRACKET CBRACKET
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
 %token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT WITH OF PIPE RIGHT_ARROW RECORD ENUMERATION
+%token LIST TUPLE
 
 %token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T FUNC_T PRINT_T 
 
@@ -110,6 +114,9 @@ FngNodeList* fng_nodes = new FngNodeList();
 %type<node_list> program body stmt_list
 %type<tuple> tuple
 %type<list> list
+%type<list_decl> list_decl
+%type<type_list> tuple_decl_list
+%type<tuple_decl> tuple_decl
 
 %type<record_field> record_field
 %type<record_field_list> record_field_list
@@ -230,8 +237,28 @@ tuple_rvalue_list:
     | tuple_rvalue_list COMMA rvalue { $$ = $1; $$->push_back($3); }
     ;
 
+
+
+tuple_decl_list:
+    type TIMES type                 
+        { 
+            $$ = new TypeList(); 
+            $$->push_back($1); 
+            $$->push_back($3);
+        }
+    | tuple_decl_list TIMES type  { $$ = $1; $$->push_back($3); }
+    ;
+
+tuple_decl:
+    TUPLE tuple_decl_list             { $$ = new TupleType($2); }
+    ;
+
 tuple:
     OPAREN tuple_rvalue_list CPAREN { $$ = new Tuple($2); }
+    ;
+
+list_decl:
+    type LIST                           { $$ = new ListType( $1 ); }
     ;
 
 list:
@@ -268,6 +295,8 @@ type:
     | CHAR_T            { $$ = new Type( Types::CHAR );     }
     | BYTE_T            { $$ = new Type( Types::BYTE );     }    
     | BOOL_T            { $$ = new Type( Types::BOOL );     }
+    | list_decl         { $$ = $1; }
+    | tuple_decl        { $$ = $1; }
     ;
 
 record_field:
@@ -285,7 +314,6 @@ record:
             DEBUG("Found record");
             $$ = new Record(new Identifier( $2, new Type( Types::RECORD )), $5);
         }
-    | error
     ;
 
 enum_field:
@@ -304,7 +332,6 @@ enum:
             DEBUG("Found Enumeration");
             $$ = new Enum(new Identifier( $2, new Type( Types::ENUM )), $5);
         }
-    | error
     ;
 
 

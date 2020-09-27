@@ -139,6 +139,8 @@ QUEST "?"
 "of"                { return OF; }
 "record"            { return RECORD; }
 "enumerate"         { return ENUMERATION; }
+"list"              { return LIST; }
+"tuple"             { return TUPLE; }
 
 "++"                { return INCREMENT; }
 "--"                { return DECREMENT; }

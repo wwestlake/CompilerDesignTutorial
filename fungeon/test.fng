@@ -52,7 +52,8 @@ record MyRecord = {
     d : float;
     e : bool;
     f : byte;
-
+    q : int list;
+    r : tuple int * float * string;
 }
 
 enumerate MyEnum = {
