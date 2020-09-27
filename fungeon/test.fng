@@ -55,7 +55,8 @@ record MyRecord = {
 
 }
 
-enumeration MyEnum = {
-    | Value of int;
-    | Error of string;
+enumerate MyEnum = {
+    | A of int;
+    | B;
+    | C of float;
 }

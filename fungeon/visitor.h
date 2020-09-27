@@ -6,6 +6,10 @@
 class Visitor {
 public:
 
+    virtual void Visit(Type* node) = 0;               
+    virtual void Visit(TupleType* node) = 0;               
+    virtual void Visit(ListType* node) = 0;               
+
     virtual void Visit(Identifier* node) = 0;
     virtual void Visit(Parameter* node) = 0 ;
     virtual void Visit(FunctionCall* node) = 0;

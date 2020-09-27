@@ -16,6 +16,9 @@ void FngLiteral<int>::accept(Visitor* visitor) { visitor->Visit(this); }
 template<>
 void FngLiteral<std::string>::accept(Visitor* visitor) { visitor->Visit(this); }
 
+void Type::accept(Visitor* visitor)  { visitor->Visit(this); }
+void ListType::accept(Visitor* visitor)  { visitor->Visit(this); }
+void TupleType::accept(Visitor* visitor)  { visitor->Visit(this); }
 
 void Identifier::accept(Visitor* visitor) { visitor->Visit(this); }
 void Parameter::accept(Visitor* visitor) { visitor->Visit(this); }
@@ -32,4 +35,3 @@ void Tuple::accept(Visitor* visitor)  { visitor->Visit(this); }
 void List::accept(Visitor* visitor)  { visitor->Visit(this); }
 void Record::accept(Visitor* visitor)  { visitor->Visit(this); }
 void Enum::accept(Visitor* visitor)  { visitor->Visit(this); }
-

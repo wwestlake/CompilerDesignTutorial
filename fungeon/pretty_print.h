@@ -36,16 +36,34 @@ class PrettyPrint : public Visitor {
     void pop_indent() { _indent -= _indent_inc; }
 
 public:
+
+    virtual void Visit(Type* node) override               
+    { 
+        std::cout << type_to_string( node->getType() );
+    }
+
+    virtual void Visit(TupleType* node) override               
+    { 
+        std::cout << type_to_string( node->getType() );
+    }
+
+    virtual void Visit(ListType* node) override               
+    { 
+        std::cout << type_to_string( node->getType() );
+    }
+
     virtual void Visit(Identifier* node) override               
     { 
         PRT("identifier");
         std::cout << node->getIdent();
     }
 
+
+
     virtual void Visit(Parameter* node) override                
     { 
         PRT("parameter");
-        std::cout << "(" << node->getIdent()->getIdent() << " : " << type_to_string( node->getType() ) << ")";
+        std::cout << "(" << node->getIdent()->getIdent() << " : " << type_to_string( node->getType()->getType() ) << ")";
     }
 
     virtual void Visit(RValue* node) override 
@@ -206,7 +224,7 @@ public:
         for (auto n : *node->getFieldList())
         {
             indent();
-            std::cout << n->getIdent()->getIdent() << " : " << type_to_string( n->getType() ) << ";" << std::endl;
+            std::cout << n->getIdent()->getIdent() << " : " << type_to_string( n->getType()->getType() ) << ";" << std::endl;
         }
         pop_indent();
         std::cout << "}";
@@ -219,11 +237,13 @@ public:
         for (auto n : *node->getFieldList())
         {
             indent();
-            std::cout << "| " << n->getIdent()->getIdent() << " : " << type_to_string( n->getType() ) << ";" << std::endl;
+            std::cout << "|" << n->getIdent()->getIdent() << " of " << type_to_string( n->getType()->getType() ) << ";" << std::endl;
         }
         pop_indent();
         std::cout << "}";
     }
+
+
 
 };
 

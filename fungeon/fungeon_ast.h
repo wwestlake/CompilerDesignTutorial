@@ -16,8 +16,13 @@ enum class Types {
     ENUM,
     FUNC,
     INFER,
+    LIST,
+    TUPLE,
     UNIT
 };
+
+
+
 
 enum class Operators {
     PLUS,             
@@ -37,6 +42,7 @@ enum class Operators {
 };
 
 
+
 static std::string type_to_string(Types type)
 {
     switch (type)
@@ -52,7 +58,8 @@ static std::string type_to_string(Types type)
         case Types::FUNC: return "func";
         case Types::INFER: return "infer";
         case Types::UNIT: return "unit";
-
+        case Types::LIST: return "list";
+        case Types::TUPLE: return "tuple";
     }
     return "";
 }
@@ -97,6 +104,42 @@ public:
 typedef std::vector<FngNode*> FngNodeList;
 
 
+class Type : public FngNode {
+protected:
+    Types _type;
+public:
+    Type(Types type) : _type(type) {}
+
+    Types getType() { return _type; }
+
+    virtual void accept(Visitor* visitor);
+
+
+};
+
+typedef std::vector<Type*> TypeList;
+
+class TupleType : public Type {
+protected:
+    TypeList* _types;
+public:
+    TupleType(TypeList* types) : Type(Types::TUPLE), _types(types) {}
+
+    TypeList* getTypes() { return _types; } 
+
+    virtual void accept(Visitor* visitor);
+
+};
+
+class ListType : public Type {
+public:
+    ListType() : Type(Types::LIST) {}
+
+    virtual void accept(Visitor* visitor);
+
+};
+
+
 class Expression : public FngNode 
 {
 };
@@ -126,15 +169,15 @@ class FngLiteralBase : public RValue {};
 template <typename T> 
 class FngLiteral : public FngLiteralBase {
 protected:
-    Types _type;
+    Type* _type;
     T _value;
 
 public:
-    FngLiteral() : _type(Types::UNIT) {}
-    FngLiteral(Types type, T value) : _type(type), _value(value) {}
+    FngLiteral() : _type(new Type(Types::UNIT)) {}
+    FngLiteral(Type* type, T value) : _type(type), _value(value) {}
 
 
-    Types getType() { return _type; }
+    Type* getType() { return _type; }
     T getValue() { return _value; }
 
     virtual void accept(Visitor* visitor);
@@ -170,14 +213,14 @@ public:
 class Identifier : public LValue {
 protected:
     std::string _ident;
-    Types _type;
+    Type* _type;
 
 public:
-    Identifier(std::string ident, Types type) : _ident(ident), _type(type) {}
+    Identifier(std::string ident, Type* type) : _ident(ident), _type(type) {}
 
     std::string getIdent() { return _ident; }
-    Types getType() { return _type; }
-    void setType(Types type) { _type = type; }
+    Type* getType() { return _type; }
+    void setType(Type* type) { _type = type; }
 
     virtual void accept(Visitor* visitor);
 
@@ -189,7 +232,7 @@ private:
     Identifier* _ident;
 
 public:
-    Parameter(Identifier* ident, Types type) : Identifier(ident->getIdent(), type), _ident(ident) {}
+    Parameter(Identifier* ident, Type* type) : Identifier(ident->getIdent(), type), _ident(ident) {}
     virtual void accept(Visitor* visitor);
 
     Identifier* getIdent() {
@@ -305,13 +348,13 @@ public:
 class RecordField {
 protected:
     Identifier* _ident;
-    Types _type;
+    Type* _type;
 
 public:
-    RecordField(Identifier* ident, Types type) : _ident(ident), _type(type) {}
+    RecordField(Identifier* ident, Type* type) : _ident(ident), _type(type) {}
 
     Identifier* getIdent() { return _ident; }
-    Types getType() { return _type; }
+    Type* getType() { return _type; }
 };
 
 typedef std::vector<RecordField*> RecordFieldList;
@@ -332,17 +375,16 @@ public:
 
 };
 
-
 class EnumField {
 protected:
     Identifier* _ident;
-    Types _type;
+    Type* _type;
 
 public:
-    EnumField(Identifier* ident, Types type) : _ident(ident), _type(type) {}
+    EnumField(Identifier* ident, Type* type) : _ident(ident), _type(type) {}
 
     Identifier* getIdent() { return _ident; }
-    Types getType() { return _type; }
+    Type* getType() { return _type; }
 };
 
 typedef std::vector<EnumField*> EnumFieldList;

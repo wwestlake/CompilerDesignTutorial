@@ -57,7 +57,7 @@ FngNodeList* fng_nodes = new FngNodeList();
     std::string* string_val;
     std::string* error_message;
     char* op_val;
-    Types type;
+    Type* type;
     Identifier* typed_identifier;
     ParameterList* param_list;
     Parameter* param;
@@ -72,20 +72,17 @@ FngNodeList* fng_nodes = new FngNodeList();
     FngNodeList* node_list;
     Tuple* tuple;
     List* list;
-
     RecordField* record_field;
     RecordFieldList* record_field_list;
     Record* record;
-
     EnumField* enum_field;
     EnumFieldList* enum_field_list;
     Enum* enumeration;
-
 };
 
 %token ERROR LET COLON QUEST IF THEN ELSE OPAREN CPAREN OBRACE CBRACE SEMI_COLON COMMA OBRACKET CBRACKET
 %token INCREMENT DECREMENT PLUS TIMES DIVIDE MOD EQ ASSIGN NOT_EQ NOT LAMBDA MINUS INTO BIND KLEISLY_BIND
-%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT RECORD ENUMERATION OF PIPE
+%token COMPOSE BEFORE AFTER GT_EQ LT_EQ GT  LT TYPE UNIT WITH OF PIPE RIGHT_ARROW RECORD ENUMERATION
 
 %token INT_T FLOAT_T STRING_T CHAR_T BYTE_T BOOL_T FUNC_T PRINT_T 
 
@@ -120,7 +117,8 @@ FngNodeList* fng_nodes = new FngNodeList();
 
 %type<enum_field> enum_field
 %type<enum_field_list> enum_field_list
-%type<enumeration> enumeration
+%type<enumeration> enum
+
 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
@@ -141,8 +139,8 @@ line:
     | print_statement                   { $$ = $1; }
     | expr                              { $$ = $1; }
     | line SEMI_COLON                   { $$ = $1; }
+    | enum                              { $$ = $1; }
     | record                            { $$ = $1; }
-    | enumeration                       { $$ = $1; }
     ;
 
 print_statement:
@@ -166,11 +164,11 @@ stmt_list:
 
 
 literal:
-    STRING_VAL      { $$ = new FngLiteral<std::string>(Types::STRING, *$1); }
-    | INT_VAL       { $$ = new FngLiteral<int>(Types::INT, $1); }
-    | FLOAT_VAL     { $$ = new FngLiteral<double>(Types::FLOAT, $1); }
-    | CHAR_VAL      { $$ = new FngLiteral<char>(Types::CHAR, $1); }
-    | BOOL_VAL      { $$ = new FngLiteral<bool>(Types::BOOL, $1); }
+    STRING_VAL      { $$ = new FngLiteral<std::string>( new Type( Types::STRING ), *$1); }
+    | INT_VAL       { $$ = new FngLiteral<int>(new Type( Types::INT ), $1); }
+    | FLOAT_VAL     { $$ = new FngLiteral<double>(new Type( Types::FLOAT ), $1); }
+    | CHAR_VAL      { $$ = new FngLiteral<char>(new Type(Types::CHAR), $1); }
+    | BOOL_VAL      { $$ = new FngLiteral<bool>(new Type(Types::BOOL), $1); }
     ;
 
 
@@ -243,7 +241,7 @@ list:
 
 
 param:
-    identifier                  { $$ = new Parameter($1, Types::INFER); }
+    identifier                  { $$ = new Parameter($1, new Type(Types::INFER) ); }
     | typed_identifier          { $$ = new Parameter($1, $1->getType()); }
     ;
 
@@ -258,16 +256,18 @@ typed_identifier:
     ;
 
 identifier:
-    IDENT               { $$ = new Identifier(std::string($1), Types::INFER);  }
+    IDENT               { $$ = new Identifier(std::string($1), new Type( Types::INFER ));  }
     ;
 
+
+
 type:
-    INT_T               { $$ = Types::INT;     }
-    | FLOAT_T           { $$ = Types::FLOAT;    }
-    | STRING_T          { $$ = Types::STRING;   }    
-    | CHAR_T            { $$ = Types::CHAR;     }
-    | BYTE_T            { $$ = Types::BYTE;     }    
-    | BOOL_T            { $$ = Types::BOOL;     }
+    INT_T               { $$ = new Type( Types::INT );     }
+    | FLOAT_T           { $$ = new Type( Types::FLOAT );    }
+    | STRING_T          { $$ = new Type( Types::STRING );   }    
+    | CHAR_T            { $$ = new Type( Types::CHAR );     }
+    | BYTE_T            { $$ = new Type( Types::BYTE );     }    
+    | BOOL_T            { $$ = new Type( Types::BOOL );     }
     ;
 
 record_field:
@@ -283,31 +283,34 @@ record:
     RECORD TYPE_IDENT ASSIGN OBRACE record_field_list CBRACE
         {
             DEBUG("Found record");
-            $$ = new Record(new Identifier( $2, Types::RECORD ), $5);
+            $$ = new Record(new Identifier( $2, new Type( Types::RECORD )), $5);
         }
+    | error
     ;
 
 enum_field:
-    PIPE TYPE_IDENT SEMI_COLON              { $$ = new EnumField(new Identifier($2, Types::UNIT), Types::UNIT); }
-    | PIPE TYPE_IDENT OF type SEMI_COLON    { $$ = new EnumField(new Identifier($2, $4), $4); }
+    PIPE TYPE_IDENT SEMI_COLON              { $$ = new EnumField(new Identifier( $2, new Type( Types::UNIT ) ), new Type( Types::UNIT )); }
+    | PIPE TYPE_IDENT OF type SEMI_COLON    { $$ = new EnumField(new Identifier( $2, $4 ), $4); }
     ;
 
 enum_field_list:
-    enum_field                      { $$ = new EnumFieldList(); $$->push_back($1); }
-    | enum_field_list enum_field    { $$ = $1; $$->push_back($2); }
+    enum_field                              { $$ = new EnumFieldList(); $$->push_back($1); }
+    | enum_field_list enum_field            { $$ = $1; $$->push_back($2); }
     ;
 
-enumeration:
-    ENUMERATION TYPE_IDENT ASSIGN OBRACE enum_field_list CBRACE 
+enum:
+    ENUMERATION TYPE_IDENT ASSIGN OBRACE enum_field_list CBRACE
         {
-            $$ = new Enum(new Identifier($2, Types::ENUM), $5);
+            DEBUG("Found Enumeration");
+            $$ = new Enum(new Identifier( $2, new Type( Types::ENUM )), $5);
         }
+    | error
     ;
 
 
 
  unit:
-    UNIT { $$ = Types::UNIT; }
+    UNIT { $$ = new Type( Types::UNIT ); }
     ;
 
 

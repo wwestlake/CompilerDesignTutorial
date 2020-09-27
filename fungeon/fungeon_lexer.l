@@ -135,10 +135,10 @@ QUEST "?"
 "byte"              { return BYTE_T;    }
 "bool"              { return BOOL_T;    }
 "print"             { return PRINT_T; }
-"record"            { return RECORD; }
-"enumeration"       { return ENUMERATION; }
+"with"              { return WITH; }
 "of"                { return OF; }
-
+"record"            { return RECORD; }
+"enumerate"         { return ENUMERATION; }
 
 "++"                { return INCREMENT; }
 "--"                { return DECREMENT; }
@@ -162,7 +162,9 @@ QUEST "?"
 "<="                { return LT_EQ; }
 ">"                 { return GT; }
 "<"                 { return LT; }
-"|"                 { return PIPE; }  
+"|"                 { return PIPE; }
+"->"                { return RIGHT_ARROW; }
+
 
 {SCOPE_OP}          { fungeon_lval.op_val = yytext; return SCOPE_OP; }
 {COLON}             { return COLON; }
