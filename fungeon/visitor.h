@@ -31,8 +31,8 @@ public:
 
     virtual void Visit(Record* node) = 0;
     virtual void Visit(Enum* node) = 0;
-
-
+    virtual void Visit(CustomType* node) = 0;
+      
     void Visit(Visitable* root)
     {
         root->accept(this);

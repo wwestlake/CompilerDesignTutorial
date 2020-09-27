@@ -53,11 +53,16 @@ record MyRecord = {
     e : bool;
     f : byte;
     q : int list;
-    r : tuple int * float * string;
+    r : tuple int * float * string * (tuple int * string * float) * int;
+    t : tuple int * (int list) * (tuple int * float * int);
+    u : MyRecord;
+    v : tuple int * MyRecord * (int list);
 }
 
 enumerate MyEnum = {
     | A of int;
     | B;
     | C of float;
+    | D of MyRecord;
+    | E of tuple int * float * MyRecord;
 }

@@ -250,7 +250,8 @@ tuple_decl_list:
     ;
 
 tuple_decl:
-    TUPLE tuple_decl_list             { $$ = new TupleType($2); }
+    TUPLE tuple_decl_list                   { $$ = new TupleType($2); }
+    | OPAREN TUPLE tuple_decl_list CPAREN   { $$ = new TupleType($3); }
     ;
 
 tuple:
@@ -259,6 +260,7 @@ tuple:
 
 list_decl:
     type LIST                           { $$ = new ListType( $1 ); }
+    | OPAREN type LIST CPAREN           { $$ = new ListType( $2 ); }    
     ;
 
 list:
@@ -297,6 +299,7 @@ type:
     | BOOL_T            { $$ = new Type( Types::BOOL );     }
     | list_decl         { $$ = $1; }
     | tuple_decl        { $$ = $1; }
+    | TYPE_IDENT        { $$ = new CustomType( new Identifier( $1, new Type( Types::INFER ) ), Types::INFER ); }
     ;
 
 record_field:

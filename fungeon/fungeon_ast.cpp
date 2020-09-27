@@ -35,3 +35,4 @@ void Tuple::accept(Visitor* visitor)  { visitor->Visit(this); }
 void List::accept(Visitor* visitor)  { visitor->Visit(this); }
 void Record::accept(Visitor* visitor)  { visitor->Visit(this); }
 void Enum::accept(Visitor* visitor)  { visitor->Visit(this); }
+void CustomType::accept(Visitor* visitor)  { visitor->Visit(this); }

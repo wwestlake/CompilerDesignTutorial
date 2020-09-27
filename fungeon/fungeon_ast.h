@@ -144,6 +144,7 @@ public:
 };
 
 
+
 class Expression : public FngNode 
 {
 };
@@ -225,6 +226,18 @@ public:
     std::string getIdent() { return _ident; }
     Type* getType() { return _type; }
     void setType(Type* type) { _type = type; }
+
+    virtual void accept(Visitor* visitor);
+
+};
+
+class CustomType : public Type {
+protected:
+    Identifier* _ident;
+public:
+    CustomType(Identifier* ident, Types type) : Type(type), _ident(ident) {}
+
+    Identifier* getIdent() { return _ident; }
 
     virtual void accept(Visitor* visitor);
 

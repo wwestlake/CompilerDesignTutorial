@@ -44,21 +44,23 @@ public:
 
     virtual void Visit(TupleType* node) override               
     { 
-        std::cout << "tuple ";
+        std::cout << "(tuple ";
         int len = node->getTypes()->size();
         int i = 0;
         for (auto n : *node->getTypes())
         {
-            std::cout << type_to_string( n->getType() );
+            n->accept(this);
             i++;
             if (i < len) std::cout << " * ";
         }
+        std::cout << ")";
     }
 
     virtual void Visit(ListType* node) override               
     { 
+        std::cout << "(";
         node->getListType()->accept(this);
-        std::cout << " list";
+        std::cout << " list)";
     }
 
     virtual void Visit(Identifier* node) override               
@@ -67,6 +69,10 @@ public:
         std::cout << node->getIdent();
     }
 
+    virtual void Visit(CustomType* node) override               
+    { 
+        node->getIdent()->accept(this);
+    }
 
 
     virtual void Visit(Parameter* node) override                
@@ -248,7 +254,9 @@ public:
         for (auto n : *node->getFieldList())
         {
             indent();
-            std::cout << "|" << n->getIdent()->getIdent() << " of " << type_to_string( n->getType()->getType() ) << ";" << std::endl;
+            std::cout << "|" << n->getIdent()->getIdent() << " of ";
+            n->getType()->accept(this);
+            std::cout << ";" << std::endl;
         }
         pop_indent();
         std::cout << "}";
